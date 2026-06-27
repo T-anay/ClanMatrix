@@ -1,0 +1,12 @@
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.log
+.env
+application-dev.properties
+application-local.properties
+.idea/
+*.iml
+.DS_Store

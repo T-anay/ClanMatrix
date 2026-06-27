@@ -1,0 +1,22 @@
+# ===== LOCAL DEV PROFIL - GIT'E GİTMEZ =====
+# Bu dosyayı .gitignore'a ekleyin veya zaten ekli olup olmadığını kontrol edin.
+# Gerçek değerlerinizi buraya girin:
+
+spring.datasource.url=jdbc:postgresql://YOUR_NEON_HOST/YOUR_DB?sslmode=require
+spring.datasource.username=YOUR_NEON_USERNAME
+spring.datasource.password=YOUR_NEON_PASSWORD
+
+jwt.secret=clanmatrix-super-secret-jwt-key-256-bits-minimum-change-this-in-prod
+jwt.expiration=86400000
+
+cloudinary.cloud-name=YOUR_CLOUDINARY_CLOUD_NAME
+cloudinary.api-key=YOUR_CLOUDINARY_API_KEY
+cloudinary.api-secret=YOUR_CLOUDINARY_API_SECRET
+
+admin.username=admin
+admin.password=Admin1234!
+
+FRONTEND_URL=http://localhost:5173
+
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true

@@ -1,0 +1,19 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Runtime data
+node_modules/
+dist/
+
+# Environment variables — NEVER COMMIT
+.env
+.env.local
+.env.*.local
+
+# Editor
+.vscode/
+.idea/
+*.iml
+.DS_Store
