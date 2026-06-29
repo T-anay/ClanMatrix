@@ -2,7 +2,9 @@ package com.clanapp.service;
 
 import com.clanapp.dto.EventRequest;
 import com.clanapp.model.Event;
+import com.clanapp.model.EventSubmission;
 import com.clanapp.repository.EventRepository;
+import com.clanapp.repository.EventSubmissionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +18,8 @@ public class EventService {
     private static final int MAX_EVENTS = 10;
 
     private final EventRepository eventRepository;
+    private final EventSubmissionRepository submissionRepository;
+    private final CloudinaryService cloudinaryService;
 
     /** Tüm etkinlikleri listele */
     public List<Event> getAllEvents() {
@@ -47,12 +51,27 @@ public class EventService {
 
     }
 
-    /** Etkinlik sil — event_submissions cascade ile otomatik silinir */
+    /** Etkinlik sil — event_submissions ve cloudinary resimleri silinir */
     @Transactional
     public void deleteEvent(Long eventId) {
         if (!eventRepository.existsById(eventId)) {
             throw new IllegalArgumentException("Etkinlik bulunamadı: " + eventId);
         }
+
+        // 1. Etkinliğe ait tüm resimleri/katılımları bul
+        List<EventSubmission> submissions = submissionRepository.findByEventId(eventId);
+        for (EventSubmission sub : submissions) {
+            // 2. Resimleri Cloudinary'den sil
+            try {
+                cloudinaryService.delete(sub.getCloudinaryPublicId());
+            } catch (Exception e) {
+                System.err.println("Cloudinary silme hatası (Public ID: " + sub.getCloudinaryPublicId() + "): " + e.getMessage());
+            }
+            // 3. Veritabanından kaydı sil
+            submissionRepository.delete(sub);
+        }
+
+        // 4. Etkinliği güvenle sil (FK hatası vermez)
         eventRepository.deleteById(eventId);
     }
 }
