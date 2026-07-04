@@ -15,8 +15,9 @@ export default function Navbar() {
   const handleLogout = () => { logout(); navigate('/login'); setMenuOpen(false); };
 
   const navItems = user ? [
-    ...(user.role === 'ADMIN' ? [{ label: t('nav.admin'), path: '/admin' }] : []),
     { label: t('nav.matrix'), path: '/matrix' },
+    { label: t('nav.rules'), path: '/rules' },
+    ...(user.role === 'ADMIN' ? [{ label: t('nav.admin'), path: '/admin' }] : []),
   ] : [];
 
   const isActive = (path) => location.pathname === path;
@@ -61,35 +62,38 @@ export default function Navbar() {
         zIndex: 100,
         boxShadow: 'var(--shadow-nav)',
       }}>
-        {/* �� Brand �� */}
-        <div
-          onClick={() => navigate(user?.role === 'ADMIN' ? '/admin' : '/matrix')}
-          style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', flexShrink: 0 }}
-        >
-          <div style={{
-            width: 44, height: 44, borderRadius: 10,
-            backgroundImage: 'url(/wow_crown_bg2.png)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            border: '1.5px solid var(--gold-primary)',
-            boxShadow: '0 0 16px var(--gold-glow)',
-            flexShrink: 0,
-          }} />
-          <div>
-            <div className="font-wow-deco gradient-gold" style={{ fontSize: 24, lineHeight: 1, fontWeight: 700 }}>
-              ClanMatrix
+        {/* Left Side: Brand + Nav Links */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 32 }}>
+          {/*  Brand  */}
+          <div
+            onClick={() => navigate(user?.role === 'ADMIN' ? '/admin' : '/matrix')}
+            style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', flexShrink: 0 }}
+          >
+            <div style={{
+              width: 44, height: 44, borderRadius: 10,
+              backgroundImage: 'url(/wow_crown_bg2.png)',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              border: '1.5px solid var(--gold-primary)',
+              boxShadow: '0 0 16px var(--gold-glow)',
+              flexShrink: 0,
+            }} />
+            <div>
+              <div className="font-wow-deco gradient-gold" style={{ fontSize: 24, lineHeight: 1, fontWeight: 700 }}>
+                ClanMatrix
+              </div>
             </div>
           </div>
+
+          {/*  Desktop Nav  */}
+          {user && (
+            <div className="desktop-nav" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              {navItems.map(item => <NavBtn key={item.path} {...item} />)}
+            </div>
+          )}
         </div>
 
-        {/* �� Desktop Nav �� */}
-        {user && (
-          <div className="desktop-nav" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            {navItems.map(item => <NavBtn key={item.path} {...item} />)}
-          </div>
-        )}
-
-        {/* �� Right Controls �� */}
+        {/*  Right Controls  */}
         {user && (
           <div className="desktop-nav" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             {/* User pill */}
@@ -139,7 +143,7 @@ export default function Navbar() {
             {/* Logout */}
             <button id="navbar-logout" onClick={handleLogout} className="btn-danger-wow" style={{ padding: '8px 16px' }}>
               {t('nav.logout')}
-            </button>⚔️⚔️
+            </button>
           </div>
         )}
 
