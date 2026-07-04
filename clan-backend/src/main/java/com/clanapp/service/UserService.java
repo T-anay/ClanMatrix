@@ -2,8 +2,11 @@ package com.clanapp.service;
 
 import com.clanapp.dto.UserResponse;
 import com.clanapp.model.User;
+import com.clanapp.model.EventSubmission;
+import com.clanapp.repository.EventSubmissionRepository;
 import com.clanapp.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,9 +14,12 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserService {
 
     private final UserRepository userRepository;
+    private final EventSubmissionRepository submissionRepository;
+    private final CloudinaryService cloudinaryService;
 
     /** Onay bekleyen kullanıcı listesi */
     public List<UserResponse> getPendingUsers() {
@@ -46,6 +52,24 @@ public class UserService {
         if (!userRepository.existsById(userId)) {
             throw new IllegalArgumentException("Kullanıcı bulunamadı: " + userId);
         }
+
+        // 1. Önce bu kullanıcının yüklediği tüm resimleri Cloudinary'den sil
+        List<EventSubmission> userSubmissions = submissionRepository.findByUserId(userId);
+        for (EventSubmission submission : userSubmissions) {
+            if (submission.getCloudinaryPublicId() != null) {
+                try {
+                    cloudinaryService.delete(submission.getCloudinaryPublicId());
+                    log.info("Kullanıcı silindiği için resmi Cloudinary'den silindi: {}", submission.getCloudinaryPublicId());
+                } catch (Exception e) {
+                    log.error("Cloudinary resim silinirken hata oluştu (Kullanıcı Silinmesi): {}", e.getMessage());
+                }
+            }
+        }
+
+        // 2. Veritabanındaki katılım kayıtlarını sil
+        submissionRepository.deleteAll(userSubmissions);
+
+        // 3. En son kullanıcıyı sil
         userRepository.deleteById(userId);
     }
 

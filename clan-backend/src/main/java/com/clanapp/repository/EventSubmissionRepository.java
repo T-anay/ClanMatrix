@@ -20,4 +20,7 @@ public interface EventSubmissionRepository extends JpaRepository<EventSubmission
 
     /** Etkinliğe ait submission'lar (cascade kontrolü için) */
     List<EventSubmission> findByEventId(Long eventId);
+
+    /** Kullanıcıya ait submission'lar (kullanıcı silinirken resimleri de silmek için) */
+    List<EventSubmission> findByUserId(Long userId);
 }
