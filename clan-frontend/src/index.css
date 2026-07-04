@@ -554,6 +554,11 @@ body > #root { position: relative; z-index: 1; }
   .wow-card { padding: 24px 20px !important; }
   .page-padding { padding: 20px 16px !important; }
   
+  /* Auth Pages */
+  .auth-container { flex-direction: column !important; }
+  .auth-image-panel { display: none !important; }
+  .auth-form-panel { padding: 20px 10px !important; justify-content: center !important; }
+  
   /* Matrix Page Layout */
   .matrix-layout-container { flex-direction: column !important; gap: 16px !important; }
   .matrix-aside { width: 100% !important; border-bottom: 1px solid var(--border-subtle); padding-bottom: 16px; margin-bottom: 16px; }

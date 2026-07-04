@@ -33,12 +33,30 @@ export default function Navbar() {
       
       <div className="nav-divider" style={{ width: 1, height: 24, background: 'var(--border-subtle)', margin: '0 8px' }} />
 
-      <button onClick={toggleLanguage} className="wow-nav-link" style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontFamily: 'Cinzel, serif', fontWeight: 700 }}>
-        {lang === 'tr' ? 'EN' : 'TR'}
+      <button onClick={toggleLanguage} style={{
+        display: 'flex', alignItems: 'center', gap: 6,
+        background: 'transparent', border: '1px solid var(--border-gold)',
+        borderRadius: 20, padding: '6px 10px', color: 'var(--text-primary)',
+        cursor: 'pointer', transition: 'all 0.2s', fontFamily: 'Cinzel, serif', fontWeight: 700
+      }}>
+        <span style={{ fontSize: 11 }}>EN</span>
+        <div className="toggle-pill" style={{ width: 24, height: 12, background: 'rgba(212, 160, 23, 0.2)', borderRadius: 10, position: 'relative' }}>
+          <div style={{ width: 10, height: 10, borderRadius: '50%', background: 'var(--gold-primary)', position: 'absolute', top: 1, left: lang === 'tr' ? 13 : 1, transition: 'left 0.2s' }} />
+        </div>
+        <span style={{ fontSize: 11 }}>TR</span>
       </button>
-      
-      <button onClick={toggleTheme} className="wow-nav-link" style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontFamily: 'Cinzel, serif', fontWeight: 700 }}>
-        {t(theme === 'dark' ? 'nav.theme.light' : 'nav.theme.dark')}
+
+      <button onClick={toggleTheme} style={{
+        display: 'flex', alignItems: 'center', gap: 8,
+        background: 'transparent', border: '1px solid var(--border-gold)',
+        borderRadius: 20, padding: '6px 14px', color: 'var(--text-primary)',
+        fontSize: 10, fontFamily: 'Cinzel, serif', letterSpacing: '0.05em',
+        cursor: 'pointer', transition: 'all 0.2s', fontWeight: 700
+      }}>
+        <div className="toggle-pill" style={{ width: 24, height: 12, background: 'rgba(212, 160, 23, 0.2)', borderRadius: 10, position: 'relative' }}>
+          <div style={{ width: 10, height: 10, borderRadius: '50%', background: 'var(--gold-primary)', position: 'absolute', top: 1, left: theme === 'dark' ? 1 : 13, transition: 'left 0.2s' }} />
+        </div>
+        {theme === 'dark' ? t('nav.theme.light').toUpperCase() : t('nav.theme.dark').toUpperCase()}
       </button>
 
       <button onClick={handleLogout} className="btn-danger-wow" style={{ marginLeft: 8 }}>
