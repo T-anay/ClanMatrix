@@ -30,6 +30,13 @@ public class EventController {
         return ResponseEntity.status(HttpStatus.CREATED).body(event);
     }
 
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Event> updateEvent(@PathVariable Long id, @Valid @RequestBody EventRequest request) {
+        Event event = eventService.updateEvent(id, request);
+        return ResponseEntity.ok(event);
+    }
+
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteEvent(@PathVariable Long id) {

@@ -45,10 +45,29 @@ public class EventService {
         Event event = Event.builder()
                 .title(request.getTitle())
                 .colorKey(colorKey)
+                .startDate(request.getStartDate())
+                .endDate(request.getEndDate())
                 .build();
 
         return eventRepository.save(event);
 
+    }
+
+    /** Etkinlik Güncelle (Başlık ve Tarihler) */
+    @Transactional
+    public Event updateEvent(Long eventId, EventRequest request) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new IllegalArgumentException("Etkinlik bulunamadı: " + eventId));
+        
+        event.setTitle(request.getTitle());
+        event.setStartDate(request.getStartDate());
+        event.setEndDate(request.getEndDate());
+        
+        if (request.getColorKey() != null) {
+            event.setColorKey(request.getColorKey());
+        }
+
+        return eventRepository.save(event);
     }
 
     /** Etkinlik sil — event_submissions ve cloudinary resimleri silinir */

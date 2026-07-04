@@ -4,6 +4,7 @@ import com.clanapp.dto.SubmissionResponse;
 import com.clanapp.service.SubmissionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -38,5 +39,13 @@ public class SubmissionController {
         SubmissionResponse response = submissionService.upsertSubmission(
                 userDetails.getUsername(), eventId, file);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    /** Resim silme (Yalnızca Admin) */
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> deleteSubmission(@PathVariable Long id) {
+        submissionService.deleteSubmission(id);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -56,6 +56,11 @@ public class SubmissionService {
 
         EventSubmission submission;
         if (existing.isPresent()) {
+            // Normal kullanıcıların kendi resimlerini değiştirmesini engelle
+            if (user.getRole() != User.Role.ADMIN) {
+                throw new IllegalStateException("Bu etkinlik için zaten bir resim yüklediniz. Yalnızca bir yönetici silebilir.");
+            }
+            
             // Güncelleme: eski resmi sil
             submission = existing.get();
             try {
@@ -76,6 +81,23 @@ public class SubmissionService {
         }
 
         return toResponse(submissionRepository.save(submission));
+    }
+
+    /** Etkinlik resmini sil (Yalnızca Admin tarafından çağrılır) */
+    @Transactional
+    public void deleteSubmission(Long submissionId) {
+        EventSubmission submission = submissionRepository.findById(submissionId)
+                .orElseThrow(() -> new IllegalArgumentException("Kayıt bulunamadı."));
+
+        if (submission.getCloudinaryPublicId() != null) {
+            try {
+                cloudinaryService.delete(submission.getCloudinaryPublicId());
+            } catch (IOException e) {
+                System.err.println("Cloudinary silme hatası: " + e.getMessage());
+            }
+        }
+        
+        submissionRepository.delete(submission);
     }
 
     private SubmissionResponse toResponse(EventSubmission s) {

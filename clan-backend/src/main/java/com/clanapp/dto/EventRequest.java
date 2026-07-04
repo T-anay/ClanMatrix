@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import java.time.LocalDate;
 
 @Data
 public class EventRequest {
@@ -17,4 +18,7 @@ public class EventRequest {
     @Min(value = 0, message = "Renk index'i 0-9 arasında olmalıdır")
     @Max(value = 9, message = "Renk index'i 0-9 arasında olmalıdır")
     private Integer colorKey = 0;
+
+    private LocalDate startDate;
+    private LocalDate endDate;
 }

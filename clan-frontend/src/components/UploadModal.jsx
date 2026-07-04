@@ -1,15 +1,11 @@
 import { useState, useRef } from 'react';
+import { useLanguage } from '../context/LanguageContext';
+import { useModal } from '../context/ModalContext';
 
-/**
- * Modal for uploading an image to a matrix cell.
- * Props:
- *   isOpen: boolean
- *   onClose: () => void
- *   onUpload: (file: File) => Promise<void>
- *   eventTitle: string
- *   hasExisting: boolean (true = update mode)
- */
-export default function UploadModal({ isOpen, onClose, onUpload, eventTitle, hasExisting }) {
+export default function UploadModal({ isOpen, onClose, onUpload, eventTitle }) {
+  const { t } = useLanguage();
+  const { confirm } = useModal();
+  
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [uploading, setUploading] = useState(false);
@@ -18,10 +14,10 @@ export default function UploadModal({ isOpen, onClose, onUpload, eventTitle, has
 
   if (!isOpen) return null;
 
-  const handleFile = (f) => {
+  const handleFile = async (f) => {
     if (!f) return;
     if (!f.type.startsWith('image/')) {
-      alert('Sadece resim dosyası yükleyebilirsiniz.');
+      await confirm(t('upload.error.onlyImages'));
       return;
     }
     setFile(f);
@@ -59,20 +55,29 @@ export default function UploadModal({ isOpen, onClose, onUpload, eventTitle, has
     <div style={{
       position: 'fixed', inset: 0, zIndex: 1000,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: 'rgba(0,0,0,0.75)',
-      backdropFilter: 'blur(4px)',
+      background: 'rgba(0,0,0,0.85)',
+      backdropFilter: 'blur(8px)',
       padding: 20,
     }}
       onClick={(e) => e.target === e.currentTarget && handleClose()}
     >
-      <div className="glass-card animate-fadeIn" style={{ width: '100%', maxWidth: 460, padding: 32 }}>
+      <div className="wow-card animate-scaleIn" style={{ 
+        width: '100%', maxWidth: 460, padding: 36, 
+        border: '1px solid var(--border-gold)',
+        boxShadow: '0 0 30px rgba(212,160,23,0.15), inset 0 0 20px rgba(212,160,23,0.05)',
+        position: 'relative', overflow: 'hidden'
+      }}>
+        {/* Decorative corner lines */}
+        <div style={{ position: 'absolute', top: 0, left: 0, width: 20, height: 20, borderTop: '2px solid var(--gold-primary)', borderLeft: '2px solid var(--gold-primary)', opacity: 0.5 }} />
+        <div style={{ position: 'absolute', bottom: 0, right: 0, width: 20, height: 20, borderBottom: '2px solid var(--gold-primary)', borderRight: '2px solid var(--gold-primary)', opacity: 0.5 }} />
+
         {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28 }}>
           <div>
-            <h2 style={{ fontSize: 18, fontWeight: 700 }}>
-              {hasExisting ? '🔄 Resim Güncelle' : '📤 Resim Yükle'}
+            <h2 className="font-wow gradient-gold" style={{ fontSize: 20, marginBottom: 4 }}>
+              {t('upload.title')}
             </h2>
-            <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 2 }}>
+            <p style={{ fontSize: 12, color: 'var(--text-muted)', fontFamily: 'Cinzel, serif', letterSpacing: '0.05em' }}>
               {eventTitle}
             </p>
           </div>
@@ -80,8 +85,10 @@ export default function UploadModal({ isOpen, onClose, onUpload, eventTitle, has
             onClick={handleClose}
             style={{
               background: 'none', border: 'none', color: 'var(--text-muted)',
-              fontSize: 20, cursor: 'pointer', lineHeight: 1,
+              fontSize: 22, cursor: 'pointer', lineHeight: 1, padding: 4, transition: 'color 0.2s'
             }}
+            onMouseEnter={e => e.currentTarget.style.color = 'var(--danger)'}
+            onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}
           >✕</button>
         </div>
 
@@ -92,43 +99,56 @@ export default function UploadModal({ isOpen, onClose, onUpload, eventTitle, has
           onDrop={handleDrop}
           onClick={() => !preview && inputRef.current?.click()}
           style={{
-            border: `2px dashed ${dragOver ? 'var(--accent-primary)' : 'var(--border-color)'}`,
+            border: `2px dashed ${dragOver ? 'var(--gold-primary)' : 'var(--border-subtle)'}`,
             borderRadius: 12,
-            padding: 24,
+            padding: preview ? 12 : 36,
             textAlign: 'center',
             cursor: preview ? 'default' : 'pointer',
-            transition: 'all 0.2s ease',
-            background: dragOver ? 'rgba(99,102,241,0.08)' : 'rgba(255,255,255,0.02)',
-            minHeight: 160,
+            transition: 'all 0.3s ease',
+            background: dragOver ? 'rgba(212,160,23,0.08)' : 'rgba(0,0,0,0.2)',
+            minHeight: 180,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            position: 'relative'
           }}
         >
           {preview ? (
-            <div style={{ position: 'relative' }}>
+            <div style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', justifyContent: 'center' }}>
               <img
                 src={preview}
                 alt="Preview"
-                style={{ maxHeight: 200, maxWidth: '100%', borderRadius: 8, objectFit: 'contain' }}
+                style={{ maxHeight: 220, maxWidth: '100%', borderRadius: 8, objectFit: 'contain', boxShadow: '0 4px 15px rgba(0,0,0,0.5)' }}
               />
               <button
                 onClick={(e) => { e.stopPropagation(); setFile(null); setPreview(null); }}
                 style={{
-                  position: 'absolute', top: -8, right: -8,
-                  background: '#ef4444', border: 'none', borderRadius: '50%',
-                  width: 24, height: 24, cursor: 'pointer', color: 'white',
-                  fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  position: 'absolute', top: -12, right: -12,
+                  background: 'var(--danger)', border: '2px solid var(--bg-card)', borderRadius: '50%',
+                  width: 30, height: 30, cursor: 'pointer', color: 'white',
+                  fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.4)', transition: 'transform 0.2s'
                 }}
+                onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.1)'}
+                onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
               >✕</button>
             </div>
           ) : (
-            <div>
-              <div style={{ fontSize: 40, marginBottom: 12 }}>🖼️</div>
-              <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>
-                Sürükle & bırak veya <span style={{ color: 'var(--accent-primary)', fontWeight: 600 }}>dosya seç</span>
-              </p>
-              <p style={{ color: 'var(--text-muted)', fontSize: 12, marginTop: 6 }}>PNG, JPG, WEBP — Max 10MB</p>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+              <div style={{ 
+                width: 56, height: 56, borderRadius: '50%', background: 'linear-gradient(135deg, rgba(212,160,23,0.1), rgba(212,160,23,0.2))',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--gold-primary)', fontSize: 24,
+                border: '1px solid rgba(212,160,23,0.3)', boxShadow: '0 0 20px rgba(212,160,23,0.1)'
+              }}>
+                +
+              </div>
+              <div>
+                <p style={{ color: 'var(--text-secondary)', fontSize: 14, fontFamily: 'Cinzel, serif', letterSpacing: '0.04em' }}>
+                  {t('upload.drag')}{' '}
+                  <span style={{ color: 'var(--gold-primary)', fontWeight: 700 }}>{t('upload.browse')}</span>
+                </p>
+                <p style={{ color: 'var(--text-muted)', fontSize: 11, marginTop: 8, textTransform: 'uppercase', letterSpacing: '0.08em' }}>PNG, JPG, WEBP — Max 10MB</p>
+              </div>
             </div>
           )}
         </div>
@@ -136,41 +156,23 @@ export default function UploadModal({ isOpen, onClose, onUpload, eventTitle, has
         <input ref={inputRef} type="file" accept="image/*" style={{ display: 'none' }}
           onChange={(e) => handleFile(e.target.files[0])} />
 
-        {/* Warning for update mode */}
-        {hasExisting && (
-          <div style={{
-            background: 'rgba(245,158,11,0.08)',
-            border: '1px solid rgba(245,158,11,0.2)',
-            borderRadius: 8, padding: '10px 14px',
-            marginTop: 16, fontSize: 12, color: '#fbbf24',
-            display: 'flex', gap: 8, alignItems: 'center',
-          }}>
-            <span>⚠️</span>
-            <span>Mevcut resminizin üzerine yazılacak ve Cloudinary'den silinecek.</span>
-          </div>
-        )}
-
         {/* Actions */}
-        <div style={{ display: 'flex', gap: 12, marginTop: 24 }}>
-          <button onClick={handleClose} style={{
-            flex: 1, padding: '11px', borderRadius: 10, border: '1px solid var(--border-color)',
-            background: 'transparent', color: 'var(--text-secondary)', cursor: 'pointer',
-            fontFamily: 'Inter, sans-serif', fontSize: 14, fontWeight: 500,
-          }}>
-            İptal
+        <div style={{ display: 'flex', gap: 12, marginTop: 28 }}>
+          <button onClick={handleClose} className="wow-btn-outline" style={{ flex: 1, padding: '12px', fontSize: 13 }}>
+            {t('confirm.cancel')}
           </button>
           <button
             onClick={handleSubmit}
-            className="btn-primary"
-            style={{ flex: 2, padding: '11px', fontSize: 14 }}
+            className="btn-gold"
+            style={{ flex: 2, padding: '12px', fontSize: 13 }}
             disabled={!file || uploading}
           >
             {uploading ? (
-              <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                <span className="animate-spin" style={{ width: 16, height: 16, border: '2px solid white', borderTopColor: 'transparent', borderRadius: '50%', display: 'inline-block' }} />
-                Yükleniyor...
+              <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+                <span className="wow-spinner" style={{ width: 14, height: 14, borderWidth: 2 }} />
+                {t('upload.uploading')}
               </span>
-            ) : hasExisting ? 'Güncelle' : 'Yükle'}
+            ) : t('upload.submit')}
           </button>
         </div>
       </div>

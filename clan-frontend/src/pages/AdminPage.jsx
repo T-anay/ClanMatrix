@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import { userService } from '../services/userService';
 import { eventService } from '../services/eventService';
+import { announcementService } from '../services/announcementService';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import { useModal } from '../context/ModalContext';
 
 const COL_COLORS = [
   { bg: 'rgba(26,107,191,0.15)',  border: '#1a6bbf', header: '#4a9fe8' },
@@ -21,11 +23,21 @@ const COL_COLORS = [
 export default function AdminPage() {
   const { user } = useAuth();
   const { t } = useLanguage();
+  const { confirm } = useModal();
+  
   const [pendingUsers, setPendingUsers] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
   const [events, setEvents] = useState([]);
-  const [newEventTitle, setNewEventTitle] = useState('');
-  const [selectedColorKey, setSelectedColorKey] = useState(0);
+  const [announcements, setAnnouncements] = useState([]);
+  
+  // Event Edit State
+  const [editingEventId, setEditingEventId] = useState(null);
+  const [eventForm, setEventForm] = useState({ title: '', colorKey: 0, startDate: '', endDate: '' });
+  
+  // Announcement Edit State
+  const [editingAnnId, setEditingAnnId] = useState(null);
+  const [annForm, setAnnForm] = useState({ content: '', colorKey: 0 });
+
   const [loading, setLoading] = useState(true);
   const [actionMsg, setActionMsg] = useState('');
   const [actionError, setActionError] = useState('');
@@ -36,14 +48,17 @@ export default function AdminPage() {
   const fetchAll = async () => {
     setLoading(true);
     try {
-      const [usersData, evts] = await Promise.all([
+      const [pendingData, usersData, evtsData, annData] = await Promise.all([
+        userService.getPending(), // FIXED: fetch pending users properly
         userService.getAll(),
         eventService.getAll(),
+        announcementService.getAll()
       ]);
-      setPendingUsers(usersData.data.filter(u => !u.approved && u.role !== 'ADMIN'));
-      setAllUsers(usersData.data.filter(u => u.approved && u.role !== 'ADMIN'));
-      setEvents(evts.data);
-    } catch { showMsg('Veriler yuklenemedi.', true); }
+      setPendingUsers(pendingData.data);
+      setAllUsers(usersData.data.filter(u => u.role !== 'ADMIN'));
+      setEvents(evtsData.data);
+      setAnnouncements(annData.data);
+    } catch { showMsg(t('admin.error.load'), true); }
     finally { setLoading(false); }
   };
 
@@ -53,42 +68,111 @@ export default function AdminPage() {
     setTimeout(() => { setActionMsg(''); setActionError(''); }, 3500);
   };
 
+  // --- Users ---
   const handleApprove = async (id) => {
-    try { await userService.approve(id); showMsg('Kullanici onaylandi.'); fetchAll(); }
-    catch { showMsg('Onay basarisiz.', true); }
+    try { await userService.approve(id); showMsg(t('admin.msg.approved')); fetchAll(); }
+    catch { showMsg(t('admin.error.approve'), true); }
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Bu kullanicinin silinmesini onayliyor musunuz?')) return;
-    try { await userService.delete(id); showMsg('Kullanici silindi.'); fetchAll(); }
-    catch { showMsg('Silme basarisiz.', true); }
+    const ok = await confirm(t('admin.confirm.deleteUser'));
+    if (!ok) return;
+    try { await userService.delete(id); showMsg(t('admin.msg.deleted')); fetchAll(); }
+    catch { showMsg(t('admin.error.delete'), true); }
   };
 
-  const handleAddEvent = async (e) => {
+  // --- Events ---
+  const handleSaveEvent = async (e) => {
     e.preventDefault();
-    if (!newEventTitle.trim()) return;
+    if (!eventForm.title.trim()) return;
     try {
-      await eventService.create({ title: newEventTitle.trim(), colorKey: selectedColorKey });
-      setNewEventTitle('');
-      setSelectedColorKey((selectedColorKey + 1) % 10);
-      showMsg('Etkinlik eklendi.');
+      const payload = {
+        title: eventForm.title.trim(),
+        colorKey: eventForm.colorKey,
+        startDate: eventForm.startDate || null,
+        endDate: eventForm.endDate || null
+      };
+
+      if (editingEventId) {
+        await eventService.update(editingEventId, payload);
+        showMsg(t('admin.msg.eventUpdated'));
+      } else {
+        await eventService.create(payload);
+        showMsg(t('admin.msg.eventAdded'));
+      }
+      
+      setEditingEventId(null);
+      setEventForm({ title: '', colorKey: (eventForm.colorKey + 1) % 10, startDate: '', endDate: '' });
       fetchAll();
     } catch (err) {
-      const msg = err.response?.data?.message || err.response?.data || 'Ekleme basarisiz.';
-      showMsg(typeof msg === 'string' ? msg : 'Ekleme basarisiz.', true);
+      const msg = err.response?.data?.message || err.response?.data || t('admin.error.save');
+      showMsg(typeof msg === 'string' ? msg : t('admin.error.save'), true);
     }
   };
 
+  const handleEditEvent = (evt) => {
+    setEditingEventId(evt.id);
+    setEventForm({
+      title: evt.title,
+      colorKey: evt.colorKey,
+      startDate: evt.startDate || '',
+      endDate: evt.endDate || ''
+    });
+  };
+
   const handleDeleteEvent = async (id, title) => {
-    if (!window.confirm(`"${title}" etkinligini silmek istiyor musunuz? Tum yuklemeler de silinir.`)) return;
-    try { await eventService.delete(id); showMsg('Etkinlik silindi.'); fetchAll(); }
-    catch { showMsg('Silme basarisiz.', true); }
+    const ok = await confirm(t('admin.confirm.deleteEvent').replace('{title}', title));
+    if (!ok) return;
+    try { await eventService.delete(id); showMsg(t('admin.msg.eventDeleted')); fetchAll(); }
+    catch { showMsg(t('admin.error.delete'), true); }
+  };
+
+  // --- Announcements ---
+  const handleSaveAnnouncement = async (e) => {
+    e.preventDefault();
+    if (!annForm.content.trim()) return;
+    try {
+      const payload = {
+        content: annForm.content.trim(),
+        colorKey: annForm.colorKey
+      };
+
+      if (editingAnnId) {
+        await announcementService.update(editingAnnId, payload);
+        showMsg(t('admin.msg.annUpdated'));
+      } else {
+        await announcementService.create(payload);
+        showMsg(t('admin.msg.annAdded'));
+      }
+      
+      setEditingAnnId(null);
+      setAnnForm({ content: '', colorKey: (annForm.colorKey + 1) % 10 });
+      fetchAll();
+    } catch {
+      showMsg(t('admin.error.save'), true);
+    }
+  };
+
+  const handleEditAnnouncement = (ann) => {
+    setEditingAnnId(ann.id);
+    setAnnForm({
+      content: ann.content,
+      colorKey: ann.colorKey
+    });
+  };
+
+  const handleDeleteAnnouncement = async (id) => {
+    const ok = await confirm(t('admin.confirm.deleteAnn'));
+    if (!ok) return;
+    try { await announcementService.delete(id); showMsg(t('admin.msg.annDeleted')); fetchAll(); }
+    catch { showMsg(t('admin.error.delete'), true); }
   };
 
   const tabs = [
     { key: 'pending', label: t('admin.tab.pending'), count: pendingUsers.length },
     { key: 'members', label: t('admin.tab.members'), count: allUsers.length },
     { key: 'events',  label: t('admin.tab.events'),  count: events.length },
+    { key: 'announcements', label: t('admin.tab.announcements'), count: announcements.length },
   ];
 
   return (
@@ -132,6 +216,7 @@ export default function AdminPage() {
               className={`wow-tab ${activeTab === tab.key ? 'active' : ''}`}
             >
               {tab.label}
+              {tab.count > 0 && <span style={{ marginLeft: 6, fontSize: 10, background: 'rgba(255,255,255,0.1)', padding: '2px 6px', borderRadius: 10 }}>{tab.count}</span>}
             </button>
           ))}
         </div>
@@ -143,12 +228,9 @@ export default function AdminPage() {
           </div>
         ) : (
           <>
+            {/* PENDING TAB */}
             {activeTab === 'pending' && (
               <div className="animate-fadeIn">
-                <div style={{ marginBottom: 16, fontSize: 16, fontFamily: 'Cinzel, serif', color: 'var(--gold-primary)', display: 'flex', alignItems: 'center', gap: 10 }}>
-                  {t('admin.tab.pending')}
-                  <span style={{ background: 'var(--bg-secondary)', padding: '2px 8px', borderRadius: 12, fontSize: 12, color: 'var(--text-primary)' }}>{pendingUsers.length}</span>
-                </div>
                 {pendingUsers.length === 0 ? (
                   <div className="wow-card" style={{ padding: 40, textAlign: 'center' }}>
                     <p className="font-wow" style={{ color: 'var(--text-secondary)' }}>{t('admin.empty.pending')}</p>
@@ -164,7 +246,7 @@ export default function AdminPage() {
                           </div>
                           <div>
                             <div style={{ fontWeight: 700, fontSize: 15, fontFamily: 'Cinzel, serif', marginBottom: 3 }}>
-                              {u.username} <span style={{ opacity: 0.5, fontSize: 11, fontWeight: 400 }}>#{u.id}</span>
+                              {u.username}
                             </div>
                             <span style={{ fontSize: 10, background: 'rgba(212,160,23,0.15)', color: 'var(--gold-primary)', padding: '4px 8px', borderRadius: 4, letterSpacing: '0.05em' }}>{t('admin.badge.pending')}</span>
                           </div>
@@ -180,12 +262,9 @@ export default function AdminPage() {
               </div>
             )}
 
+            {/* MEMBERS TAB */}
             {activeTab === 'members' && (
               <div className="animate-fadeIn">
-                <div style={{ marginBottom: 16, fontSize: 16, fontFamily: 'Cinzel, serif', color: 'var(--gold-primary)', display: 'flex', alignItems: 'center', gap: 10 }}>
-                  {t('admin.tab.members')}
-                  <span style={{ background: 'var(--bg-secondary)', padding: '2px 8px', borderRadius: 12, fontSize: 12, color: 'var(--text-primary)' }}>{allUsers.length}</span>
-                </div>
                 {allUsers.length === 0 ? (
                   <div className="wow-card" style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)' }}>{t('admin.empty.members')}</div>
                 ) : (
@@ -198,7 +277,7 @@ export default function AdminPage() {
                           </div>
                           <div>
                             <div style={{ fontWeight: 700, fontSize: 14, fontFamily: 'Cinzel, serif', marginBottom: 3 }}>
-                              {u.username} <span style={{ opacity: 0.5, fontSize: 11, fontWeight: 400 }}>#{u.id}</span>
+                              {u.username}
                             </div>
                             <span className={`badge-wow ${u.role === 'ADMIN' ? 'badge-admin-wow' : 'badge-user-wow'}`}>{u.role}</span>
                           </div>
@@ -213,59 +292,51 @@ export default function AdminPage() {
               </div>
             )}
 
+            {/* EVENTS TAB */}
             {activeTab === 'events' && (
               <div className="animate-fadeIn">
-                <div style={{ marginBottom: 16, fontSize: 16, fontFamily: 'Cinzel, serif', color: 'var(--gold-primary)', display: 'flex', alignItems: 'center', gap: 10 }}>
-                  {t('admin.tab.events')}
-                  <span style={{ background: 'var(--bg-secondary)', padding: '2px 8px', borderRadius: 12, fontSize: 12, color: 'var(--text-primary)' }}>{events.length}</span>
-                </div>
                 <div className="wow-card" style={{ padding: '22px 24px', marginBottom: 20 }}>
-                  <h3 className="font-wow" style={{ fontSize: 14, color: 'var(--gold-primary)', marginBottom: 16 }}>{t('admin.event.add.title')}</h3>
-                  <form onSubmit={handleAddEvent} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                    <h3 className="font-wow" style={{ fontSize: 14, color: 'var(--gold-primary)' }}>
+                      {editingEventId ? t('admin.event.edit.title') : t('admin.event.add.title')}
+                    </h3>
+                    {editingEventId && (
+                      <button onClick={() => { setEditingEventId(null); setEventForm({ title: '', colorKey: 0, startDate: '', endDate: '' }); }} className="btn-danger-wow" style={{ padding: '4px 8px', fontSize: 10 }}>
+                        {t('confirm.cancel')}
+                      </button>
+                    )}
+                  </div>
+                  <form onSubmit={handleSaveEvent} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                     <div style={{ display: 'flex', gap: 10 }}>
-                      <input className="wow-input" placeholder={t('admin.event.input')} value={newEventTitle} onChange={e => setNewEventTitle(e.target.value)} style={{ flex: 1 }} maxLength={100} disabled={events.length >= 10} />
-                      <button type="submit" className="btn-gold" disabled={events.length >= 10 || !newEventTitle.trim()}>{t('admin.event.btn.add')}</button>
+                      <input className="wow-input" placeholder={t('admin.event.input')} value={eventForm.title} onChange={e => setEventForm({ ...eventForm, title: e.target.value })} style={{ flex: 1 }} maxLength={100} disabled={!editingEventId && events.length >= 10} />
+                    </div>
+                    <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                      <div style={{ flex: 1, minWidth: 140 }}>
+                        <label style={{ fontSize: 10, color: 'var(--text-muted)', fontFamily: 'Cinzel, serif', marginBottom: 4, display: 'block' }}>{t('admin.event.start')}</label>
+                        <input type="date" className="wow-input" value={eventForm.startDate} onChange={e => setEventForm({ ...eventForm, startDate: e.target.value })} disabled={!editingEventId && events.length >= 10} />
+                      </div>
+                      <div style={{ flex: 1, minWidth: 140 }}>
+                        <label style={{ fontSize: 10, color: 'var(--text-muted)', fontFamily: 'Cinzel, serif', marginBottom: 4, display: 'block' }}>{t('admin.event.end')}</label>
+                        <input type="date" className="wow-input" value={eventForm.endDate} onChange={e => setEventForm({ ...eventForm, endDate: e.target.value })} disabled={!editingEventId && events.length >= 10} />
+                      </div>
                     </div>
                     <div>
                       <div style={{ fontSize: 10, color: 'var(--text-muted)', fontFamily: 'Cinzel, serif', marginBottom: 8 }}>{t('admin.event.color')}</div>
                       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                         {COL_COLORS.map((col, idx) => (
-                          <div key={idx} onClick={() => setSelectedColorKey(idx)} style={{ width: 32, height: 32, borderRadius: 8, background: col.border, border: selectedColorKey === idx ? '2px solid var(--text-primary)' : '2px solid transparent', cursor: 'pointer', transition: 'all 0.2s', position: 'relative' }}>
-                            {selectedColorKey === idx && <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>✓</div>}
+                          <div key={idx} onClick={() => setEventForm({ ...eventForm, colorKey: idx })} style={{ width: 32, height: 32, borderRadius: 8, background: col.border, border: eventForm.colorKey === idx ? '2px solid var(--text-primary)' : '2px solid transparent', cursor: 'pointer', transition: 'all 0.2s', position: 'relative' }}>
+                            {eventForm.colorKey === idx && <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>✓</div>}
                           </div>
                         ))}
                       </div>
                     </div>
+                    <button type="submit" className="btn-gold" disabled={(!editingEventId && events.length >= 10) || !eventForm.title.trim()}>
+                      {editingEventId ? t('admin.btn.save') : t('admin.event.btn.add')}
+                    </button>
                   </form>
-                  {events.length >= 10 && (
-                    <p className="wow-alert-warning" style={{ marginTop: 12 }}>
-                      {t('admin.event.limit')}
-                    </p>
+                  {!editingEventId && events.length >= 10 && (
+                    <p className="wow-alert-warning" style={{ marginTop: 12 }}>{t('admin.event.limit')}</p>
                   )}
-                  {/* Progress bar */}
-                  <div style={{ marginTop: 14 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                      <span style={{ fontSize: 10, color: 'var(--text-muted)', fontFamily: 'Cinzel, serif', letterSpacing: '0.07em', textTransform: 'uppercase' }}>
-                        {t('admin.event.capacity')}
-                      </span>
-                      <span className="font-wow" style={{ fontSize: 12, color: events.length >= 10 ? 'var(--danger)' : 'var(--gold-primary)' }}>
-                        {events.length} / 10
-                      </span>
-                    </div>
-                    <div style={{ height: 6, borderRadius: 3, background: 'var(--bg-secondary)', overflow: 'hidden' }}>
-                      <div style={{
-                        height: '100%', borderRadius: 3,
-                        width: `${(events.length / 10) * 100}%`,
-                        background: events.length >= 10
-                          ? 'var(--danger)'
-                          : events.length >= 7
-                            ? 'var(--warning)'
-                            : 'linear-gradient(to right, var(--gold-dark), var(--gold-primary))',
-                        transition: 'width 0.4s ease',
-                        boxShadow: events.length < 10 ? '0 0 8px var(--gold-glow)' : 'none',
-                      }} />
-                    </div>
-                  </div>
                 </div>
 
                 {/* Event list */}
@@ -280,20 +351,103 @@ export default function AdminPage() {
                         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                           <div style={{
                             width: 32, height: 32, borderRadius: 8, flexShrink: 0,
-                            background: 'linear-gradient(135deg, var(--bg-secondary), var(--bg-panel))',
-                            border: '1px solid var(--border-gold)',
+                            background: COL_COLORS[evt.colorKey]?.bg || 'var(--bg-secondary)',
+                            border: `1px solid ${COL_COLORS[evt.colorKey]?.border || 'var(--border-gold)'}`,
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            fontSize: 12, fontWeight: 900, color: 'var(--gold-primary)', fontFamily: 'Cinzel, serif',
+                            fontSize: 12, fontWeight: 900, color: '#fff', fontFamily: 'Cinzel, serif',
                           }}>
                             {idx + 1}
                           </div>
-                          <span className="font-wow" style={{ fontSize: 14, color: 'var(--text-primary)', fontWeight: 600 }}>
-                            {evt.title}
-                          </span>
+                          <div>
+                            <span className="font-wow" style={{ fontSize: 14, color: 'var(--text-primary)', fontWeight: 600, display: 'block' }}>
+                              {evt.title}
+                            </span>
+                            {(evt.startDate || evt.endDate) && (
+                              <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>
+                                {evt.startDate || '?'} - {evt.endDate || '?'}
+                              </span>
+                            )}
+                          </div>
                         </div>
-                        <button id={`delete-event-${evt.id}`} className="btn-danger-wow" onClick={() => handleDeleteEvent(evt.id, evt.title)}>
-                          {t('admin.btn.delete')}
-                        </button>
+                        <div style={{ display: 'flex', gap: 8 }}>
+                          <button className="wow-btn-outline" style={{ padding: '4px 10px', fontSize: 11 }} onClick={() => handleEditEvent(evt)}>
+                            {t('admin.btn.edit')}
+                          </button>
+                          <button className="btn-danger-wow" onClick={() => handleDeleteEvent(evt.id, evt.title)}>
+                            {t('admin.btn.delete')}
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ANNOUNCEMENTS TAB */}
+            {activeTab === 'announcements' && (
+              <div className="animate-fadeIn">
+                <div className="wow-card" style={{ padding: '22px 24px', marginBottom: 20 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                    <h3 className="font-wow" style={{ fontSize: 14, color: 'var(--gold-primary)' }}>
+                      {editingAnnId ? t('admin.ann.edit.title') : t('admin.ann.add.title')}
+                    </h3>
+                    {editingAnnId && (
+                      <button onClick={() => { setEditingAnnId(null); setAnnForm({ content: '', colorKey: 0 }); }} className="btn-danger-wow" style={{ padding: '4px 8px', fontSize: 10 }}>
+                        {t('confirm.cancel')}
+                      </button>
+                    )}
+                  </div>
+                  <form onSubmit={handleSaveAnnouncement} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                    <textarea 
+                      className="wow-input" 
+                      placeholder={t('admin.ann.input')} 
+                      value={annForm.content} 
+                      onChange={e => setAnnForm({ ...annForm, content: e.target.value })} 
+                      style={{ minHeight: 80, resize: 'vertical' }} 
+                      required 
+                    />
+                    <div>
+                      <div style={{ fontSize: 10, color: 'var(--text-muted)', fontFamily: 'Cinzel, serif', marginBottom: 8 }}>{t('admin.event.color')}</div>
+                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                        {COL_COLORS.map((col, idx) => (
+                          <div key={idx} onClick={() => setAnnForm({ ...annForm, colorKey: idx })} style={{ width: 32, height: 32, borderRadius: 8, background: col.border, border: annForm.colorKey === idx ? '2px solid var(--text-primary)' : '2px solid transparent', cursor: 'pointer', transition: 'all 0.2s', position: 'relative' }}>
+                            {annForm.colorKey === idx && <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>✓</div>}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <button type="submit" className="btn-gold" disabled={!annForm.content.trim()}>
+                      {editingAnnId ? t('admin.btn.save') : t('admin.ann.btn.add')}
+                    </button>
+                  </form>
+                </div>
+
+                {/* Announcement list */}
+                {announcements.length === 0 ? (
+                  <div className="wow-card" style={{ padding: '60px 40px', textAlign: 'center' }}>
+                    <p className="font-wow" style={{ color: 'var(--text-secondary)' }}>{t('admin.empty.ann')}</p>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {announcements.map((ann) => (
+                      <div key={ann.id} className="wow-card" style={{ padding: '14px 20px', display: 'flex', flexDirection: 'column', gap: 12, borderLeft: `4px solid ${COL_COLORS[ann.colorKey]?.border || 'var(--border-gold)'}` }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                          <span style={{ fontSize: 13, color: 'var(--text-primary)', whiteSpace: 'pre-wrap' }}>
+                            {ann.content}
+                          </span>
+                          <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+                            <button className="wow-btn-outline" style={{ padding: '4px 10px', fontSize: 11 }} onClick={() => handleEditAnnouncement(ann)}>
+                              {t('admin.btn.edit')}
+                            </button>
+                            <button className="btn-danger-wow" onClick={() => handleDeleteAnnouncement(ann.id)}>
+                              {t('admin.btn.delete')}
+                            </button>
+                          </div>
+                        </div>
+                        <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>
+                          {new Date(ann.createdAt).toLocaleDateString()}
+                        </span>
                       </div>
                     ))}
                   </div>

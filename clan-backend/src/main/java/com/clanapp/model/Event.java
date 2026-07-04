@@ -2,6 +2,7 @@ package com.clanapp.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -24,6 +25,9 @@ public class Event {
     @Column(name = "color_key", nullable = false, columnDefinition = "int default 0")
     @Builder.Default
     private Integer colorKey = 0;
+
+    private LocalDate startDate;
+    private LocalDate endDate;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
