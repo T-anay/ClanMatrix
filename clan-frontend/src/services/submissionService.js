@@ -11,4 +11,6 @@ export const submissionService = {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
   },
+
+  delete: (id) => api.delete(`/submissions/${id}`),
 };
