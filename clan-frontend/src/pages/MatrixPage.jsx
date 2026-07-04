@@ -200,7 +200,7 @@ export default function MatrixPage() {
           
           {/* ASIDE: Announcements */}
           <aside className="matrix-aside" style={{ width: 280, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <h2 className="font-wow" style={{ fontSize: 16, color: 'var(--gold-primary)', borderBottom: '1px solid var(--border-gold)', paddingBottom: 8 }}>
+            <h2 className="font-wow gradient-gold" style={{ fontSize: 16, borderBottom: '1px solid var(--border-gold)', paddingBottom: 8, letterSpacing: '0.04em' }}>
               {t('matrix.announcements')}
             </h2>
             {announcements.length === 0 ? (
