@@ -9,6 +9,7 @@ import RegisterPage from './pages/RegisterPage';
 import PendingApprovalPage from './pages/PendingApprovalPage';
 import MatrixPage from './pages/MatrixPage';
 import AdminPage from './pages/AdminPage';
+import RulesPage from './pages/RulesPage';
 
 export default function App() {
   return (
@@ -21,6 +22,12 @@ export default function App() {
                 <Route path="/login"            element={<LoginPage />} />
                 <Route path="/register"         element={<RegisterPage />} />
                 <Route path="/pending-approval" element={<PendingApprovalPage />} />
+
+                <Route path="/rules" element={
+                  <ProtectedRoute allowedRoles={['USER', 'ADMIN']}>
+                    <RulesPage />
+                  </ProtectedRoute>
+                } />
 
                 <Route path="/matrix" element={
                   <ProtectedRoute allowedRoles={['USER', 'ADMIN']}>

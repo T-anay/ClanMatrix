@@ -544,6 +544,21 @@ body > #root { position: relative; z-index: 1; }
     flex-wrap: nowrap !important;
   }
   .tabs-row::-webkit-scrollbar { height: 2px; }
+
+  /* Navbar Layout */
+  .desktop-nav { display: none !important; }
+  .mobile-menu-btn { display: block !important; }
+  .nav-divider { display: none !important; }
+  
+  /* Generic Padding Adjustments */
+  .wow-card { padding: 24px 20px !important; }
+  .page-padding { padding: 20px 16px !important; }
+  
+  /* Matrix Page Layout */
+  .matrix-layout-container { flex-direction: column !important; gap: 16px !important; }
+  .matrix-aside { width: 100% !important; border-bottom: 1px solid var(--border-subtle); padding-bottom: 16px; margin-bottom: 16px; }
+  .matrix-toolbar { flex-direction: column !important; align-items: stretch !important; }
+  .matrix-toolbar input, .matrix-toolbar select { max-width: 100% !important; }
 }
 
 /* Mobile */

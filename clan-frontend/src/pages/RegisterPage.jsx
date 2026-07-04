@@ -44,10 +44,10 @@ export default function RegisterPage() {
   };
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-primary)' }}>
+    <div className="auth-container" style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-primary)' }}>
       
       {/* Left Pane - Image */}
-      <div style={{
+      <div className="auth-image-panel" style={{
         flex: 1,
         backgroundImage: 'url(/wow_crown_bg2.png)',
         backgroundSize: 'cover',
@@ -73,7 +73,7 @@ export default function RegisterPage() {
       </div>
 
       {/* Right Pane - Form */}
-      <div style={{
+      <div className="auth-form-panel" style={{
         flex: 1,
         display: 'flex',
         flexDirection: 'column',

@@ -37,6 +37,24 @@ const translations = {
     'error.default': 'Bir hata oluştu.',
     'error.password_mismatch': 'Şifreler birbiriyle eşleşmiyor.',
     
+    // Pending Approval
+    'pending.status': 'Durum Bildirimi',
+    'pending.title': 'Lider Onayı Bekleniyor',
+    'pending.desc': 'Klan başvurunuz alındı. Klana kabul edilmek için liderinizin sizi onaylaması gerekmektedir. Onaylandıktan sonra aynı bilgilerinizle giriş yapabilirsiniz.',
+    'pending.alert': 'Onay süreci için klan liderinizle iletişime geçebilirsiniz.',
+    'pending.back': 'Giriş Sayfasına Dön',
+
+    // Rules Page
+    'nav.rules': 'Kurallar',
+    'rules.title': 'Sistem Kuralları',
+    'rules.subtitle': 'Lütfen kullanıma dair kuralları dikkatlice okuyunuz.',
+    'rules.section1.title': '1. Fotoğraf Yükleme',
+    'rules.section1.desc': 'Etkinlik tablosunda kendi satırınızdaki hücreye tıklayarak katılım fotoğrafınızı yükleyebilirsiniz. Yüklenen fotoğrafın boyutu en fazla 10MB olmalıdır.',
+    'rules.section2.title': '2. Fotoğraf Değişikliği ve Silme',
+    'rules.section2.desc': 'Güvenlik ve suistimali önlemek amacıyla, yüklediğiniz bir katılım fotoğrafını SİLEMEZ veya DEĞİŞTİREMEZSİNİZ. Eğer yanlış bir fotoğraf yüklediyseniz, lütfen yetkili bir Admin ile iletişime geçin.',
+    'rules.section3.title': '3. Admin Yetkileri',
+    'rules.section3.desc': 'Sistemdeki Adminler yüklenen tüm fotoğrafları silebilir, yeni etkinlikler ve duyurular oluşturabilir.',
+
     // Custom Modal
     'confirm.title': 'Emin misiniz?',
     'confirm.yes': 'Evet, Onaylıyorum',
@@ -177,6 +195,24 @@ const translations = {
     'error.network': 'Could not connect to the server. Please try again later.',
     'error.default': 'An error occurred.',
     'error.password_mismatch': 'Passwords do not match.',
+
+    // Pending Approval
+    'pending.status': 'Status Update',
+    'pending.title': 'Pending Leader Approval',
+    'pending.desc': 'Your clan application has been received. You must be approved by your leader to join the clan. Once approved, you can log in with your credentials.',
+    'pending.alert': 'You can contact your clan leader for the approval process.',
+    'pending.back': 'Back to Login',
+
+    // Rules Page
+    'nav.rules': 'Guidelines',
+    'rules.title': 'System Guidelines',
+    'rules.subtitle': 'Please carefully read the rules regarding the system usage.',
+    'rules.section1.title': '1. Uploading Photos',
+    'rules.section1.desc': 'You can upload your participation photo by clicking on the cell in your own row in the event table. Uploaded images must be at most 10MB.',
+    'rules.section2.title': '2. Changing and Deleting Photos',
+    'rules.section2.desc': 'To ensure security and prevent abuse, you CANNOT delete or change an uploaded participation photo. If you uploaded the wrong photo, please contact an authorized Admin.',
+    'rules.section3.title': '3. Admin Privileges',
+    'rules.section3.desc': 'Admins in the system can delete all uploaded photos and create new events and announcements.',
 
     // Custom Modal
     'confirm.title': 'Are you sure?',

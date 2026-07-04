@@ -194,12 +194,12 @@ export default function MatrixPage() {
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg-primary)' }}>
       <Navbar />
-      <div style={{ padding: '28px 24px', maxWidth: 1600, margin: '0 auto' }}>
+      <div className="page-padding" style={{ padding: '28px 24px', maxWidth: 1600, margin: '0 auto' }}>
 
-        <div style={{ display: 'flex', gap: 24, flexDirection: 'row', alignItems: 'flex-start' }}>
+        <div className="matrix-layout-container" style={{ display: 'flex', gap: 24, flexDirection: 'row', alignItems: 'flex-start' }}>
           
           {/* ASIDE: Announcements */}
-          <aside style={{ width: 280, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <aside className="matrix-aside" style={{ width: 280, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 16 }}>
             <h2 className="font-wow" style={{ fontSize: 16, color: 'var(--gold-primary)', borderBottom: '1px solid var(--border-gold)', paddingBottom: 8 }}>
               {t('matrix.announcements')}
             </h2>
@@ -250,7 +250,7 @@ export default function MatrixPage() {
             {error         && <div className="wow-alert-error"   style={{ marginBottom: 14 }}>{error}</div>}
 
             {/* Toolbar */}
-            <div style={{ display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
+            <div className="matrix-toolbar" style={{ display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
               <input
                 id="matrix-search"
                 className="wow-input"
