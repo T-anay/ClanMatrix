@@ -331,7 +331,7 @@ export default function MatrixPage() {
                   {/* Column Headers */}
                   <div style={{
                     display: 'grid',
-                    gridTemplateColumns: `222px repeat(${events.length}, 140px)`,
+                    gridTemplateColumns: `222px repeat(${events.length}, 120px)`,
                     background: 'var(--bg-secondary)',
                     borderBottom: '2px solid var(--border-gold)',
                   }}>
@@ -384,7 +384,7 @@ export default function MatrixPage() {
                       return (
                         <div key={rowUser.id} style={{
                           display: 'grid',
-                          gridTemplateColumns: `222px repeat(${events.length}, 140px)`,
+                          gridTemplateColumns: `222px repeat(${events.length}, 120px)`,
                           borderBottom: idx < sortedUsers.length - 1 ? '1px solid var(--border-subtle)' : 'none',
                           background: isMe ? 'rgba(212,160,23,0.05)' : idx % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.015)',
                           borderLeft: isMe ? '3px solid var(--gold-primary)' : '3px solid transparent',
