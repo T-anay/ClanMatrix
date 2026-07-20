@@ -17,6 +17,7 @@ export default function Navbar() {
   const navItems = user ? [
     { label: t('nav.matrix'), path: '/matrix' },
     { label: t('nav.rules'), path: '/rules' },
+    { label: t('nav.profile'), path: '/profile' },
     ...(user.role === 'ADMIN' ? [{ label: t('nav.admin'), path: '/admin' }] : []),
   ] : [];
 

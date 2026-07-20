@@ -29,6 +29,10 @@ public class Event {
     private LocalDate startDate;
     private LocalDate endDate;
 
+    @Column(name = "sort_order", nullable = false, columnDefinition = "int default 0")
+    @Builder.Default
+    private Integer sortOrder = 0;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

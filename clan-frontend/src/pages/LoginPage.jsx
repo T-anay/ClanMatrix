@@ -15,6 +15,7 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
   const { lang, toggleLanguage, t } = useLanguage();
+  const [showForgotModal, setShowForgotModal] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -26,14 +27,17 @@ export default function LoginPage() {
       login(token, { username, role });
       navigate(role === 'ADMIN' ? '/admin' : '/matrix');
     } catch (err) {
-      if (err.response?.status === 401) {
-        setError(t('error.401'));
+      const serverMsg = err.response?.data?.message || err.response?.data;
+      if (err.response?.status === 400 && typeof serverMsg === 'string') {
+        setError(t(serverMsg));
+      } else if (err.response?.status === 401) {
+        setError(typeof serverMsg === 'string' && serverMsg.startsWith('auth.error') ? t(serverMsg) : t('error.401'));
       } else if (err.response?.status === 403) {
         setError(t('error.403'));
       } else if (!err.response) {
         setError(t('error.network'));
       } else {
-        setError(t('error.default'));
+        setError(typeof serverMsg === 'string' ? t(serverMsg) : t('error.default'));
       }
     } finally {
       setLoading(false);
@@ -201,16 +205,45 @@ export default function LoginPage() {
           </form>
 
           {/* Register Link */}
-          <div style={{ textAlign: 'center', marginTop: 32, fontSize: 12, color: 'var(--text-secondary)' }}>
-            {t('auth.login.noaccount')}{' '}
-            <Link to="/register" style={{ color: 'var(--gold-primary)', textDecoration: 'none', fontWeight: 'bold', letterSpacing: '0.05em', transition: 'all 0.2s' }}
-              onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'}
-              onMouseLeave={(e) => e.target.style.color = 'var(--gold-primary)'}>
-              {t('auth.login.register')}
-            </Link>
+          <div style={{ textAlign: 'center', marginTop: 32, fontSize: 12, color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div>
+              {t('auth.login.noaccount')}{' '}
+              <Link to="/register" style={{ color: 'var(--gold-primary)', textDecoration: 'none', fontWeight: 'bold', letterSpacing: '0.05em', transition: 'all 0.2s' }}
+                onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'}
+                onMouseLeave={(e) => e.target.style.color = 'var(--gold-primary)'}>
+                {t('auth.login.register')}
+              </Link>
+            </div>
+            <div>
+              <span 
+                onClick={() => setShowForgotModal(true)} 
+                style={{ color: 'var(--text-muted)', cursor: 'pointer', fontSize: 11, borderBottom: '1px dashed var(--text-muted)', paddingBottom: 2, transition: 'all 0.2s' }}
+                onMouseEnter={(e) => { e.target.style.color = 'var(--gold-primary)'; e.target.style.borderColor = 'var(--gold-primary)'; }}
+                onMouseLeave={(e) => { e.target.style.color = 'var(--text-muted)'; e.target.style.borderColor = 'var(--text-muted)'; }}
+              >
+                {t('auth.login.forgot')}
+              </span>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Forgot Password Modal */}
+      {showForgotModal && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 2000, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+          <div className="wow-card animate-fadeInUp" style={{ width: '100%', maxWidth: 360, padding: '24px 28px', border: '2px solid var(--border-gold)', background: 'var(--bg-card)', textAlign: 'center' }}>
+            <h3 className="font-wow gradient-gold" style={{ fontSize: 16, marginBottom: 16, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              {t('auth.login.forgot')}
+            </h3>
+            <p style={{ color: 'var(--text-primary)', fontSize: 13, lineHeight: 1.6, marginBottom: 20, fontFamily: 'Cinzel, serif' }}>
+              {t('auth.login.forgot.info')}
+            </p>
+            <button className="btn-gold" onClick={() => setShowForgotModal(false)} style={{ padding: '8px 24px', width: '100%' }}>
+              {t('confirm.ok')}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

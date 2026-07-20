@@ -43,4 +43,11 @@ public class EventController {
         eventService.deleteEvent(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PutMapping("/order")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> updateEventOrder(@RequestBody List<Long> orderedIds) {
+        eventService.updateEventOrder(orderedIds);
+        return ResponseEntity.ok().build();
+    }
 }

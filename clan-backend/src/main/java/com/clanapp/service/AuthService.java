@@ -17,8 +17,8 @@ public class AuthService {
     private final JwtUtil jwtUtil;
 
     public String register(RegisterRequest request) {
-        if (userRepository.existsByUsername(request.getUsername())) {
-            throw new IllegalArgumentException("Bu kullanıcı adı zaten alınmış.");
+        if (userRepository.existsByUsernameIgnoreCase(request.getUsername())) {
+            throw new IllegalArgumentException("auth.error.username_taken");
         }
 
         User user = User.builder()
@@ -33,15 +33,15 @@ public class AuthService {
     }
 
     public LoginResponse login(LoginRequest request) {
-        User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new IllegalArgumentException("Kullanıcı adı veya şifre hatalı."));
+        User user = userRepository.findByUsernameIgnoreCase(request.getUsername())
+                .orElseThrow(() -> new IllegalArgumentException("auth.error.invalid_credentials"));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new IllegalArgumentException("Kullanıcı adı veya şifre hatalı.");
+            throw new IllegalArgumentException("auth.error.invalid_credentials");
         }
 
         if (!user.isApproved()) {
-            throw new IllegalStateException("Hesabınız yönetici onayı bekliyor.");
+            throw new IllegalStateException("auth.error.pending_approval");
         }
 
         String token = jwtUtil.generateToken(user.getUsername(), user.getRole().name());

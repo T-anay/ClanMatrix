@@ -40,4 +40,11 @@ public class AnnouncementController {
         announcementService.deleteAnnouncement(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PutMapping("/order")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> updateAnnouncementOrder(@RequestBody List<Long> orderedIds) {
+        announcementService.updateAnnouncementOrder(orderedIds);
+        return ResponseEntity.ok().build();
+    }
 }

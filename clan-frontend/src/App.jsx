@@ -10,6 +10,7 @@ import PendingApprovalPage from './pages/PendingApprovalPage';
 import MatrixPage from './pages/MatrixPage';
 import AdminPage from './pages/AdminPage';
 import RulesPage from './pages/RulesPage';
+import ProfilePage from './pages/ProfilePage';
 
 export default function App() {
   return (
@@ -32,6 +33,12 @@ export default function App() {
                 <Route path="/matrix" element={
                   <ProtectedRoute allowedRoles={['USER', 'ADMIN']}>
                     <MatrixPage />
+                  </ProtectedRoute>
+                } />
+
+                <Route path="/profile" element={
+                  <ProtectedRoute allowedRoles={['USER', 'ADMIN']}>
+                    <ProfilePage />
                   </ProtectedRoute>
                 } />
 

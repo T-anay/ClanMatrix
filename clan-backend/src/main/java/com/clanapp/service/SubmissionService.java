@@ -41,7 +41,7 @@ public class SubmissionService {
      */
     @Transactional
     public SubmissionResponse upsertSubmission(String username, Long eventId, MultipartFile file) throws IOException {
-        User user = userRepository.findByUsername(username)
+        User user = userRepository.findByUsernameIgnoreCase(username)
                 .orElseThrow(() -> new IllegalArgumentException("Kullanıcı bulunamadı."));
 
         Event event = eventRepository.findById(eventId)

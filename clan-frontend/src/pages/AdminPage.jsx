@@ -38,6 +38,11 @@ export default function AdminPage() {
   const [editingAnnId, setEditingAnnId] = useState(null);
   const [annForm, setAnnForm] = useState({ content: '', colorKey: 0 });
 
+  // Reset Password State
+  const [resetModalOpen, setResetModalOpen] = useState(false);
+  const [resetUser, setResetUser] = useState(null);
+  const [newPasswordInput, setNewPasswordInput] = useState('');
+
   const [loading, setLoading] = useState(true);
   const [actionMsg, setActionMsg] = useState('');
   const [actionError, setActionError] = useState('');
@@ -168,6 +173,72 @@ export default function AdminPage() {
     catch { showMsg(t('admin.error.delete'), true); }
   };
 
+  // --- Reset Password ---
+  const handleOpenResetModal = (u) => {
+    setResetUser(u);
+    setNewPasswordInput('');
+    setResetModalOpen(true);
+  };
+
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+    if (!newPasswordInput.trim() || newPasswordInput.length < 6) {
+      showMsg(t('auth.register.rules.password'), true);
+      return;
+    }
+    try {
+      await userService.resetPassword(resetUser.id, { newPassword: newPasswordInput.trim() });
+      showMsg(t('admin.reset_password.success'));
+      setResetModalOpen(false);
+      setResetUser(null);
+    } catch (err) {
+      const msg = err.response?.data?.message || t('admin.error.save');
+      showMsg(typeof msg === 'string' ? t(msg) : t('admin.error.save'), true);
+    }
+  };
+
+  const handleMoveEvent = async (index, direction) => {
+    const updated = [...events];
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= updated.length) return;
+
+    const temp = updated[index];
+    updated[index] = updated[targetIndex];
+    updated[targetIndex] = temp;
+
+    setEvents(updated);
+
+    try {
+      const orderedIds = updated.map(e => e.id);
+      await eventService.updateOrder(orderedIds);
+      showMsg(t('admin.msg.orderUpdated'));
+    } catch {
+      showMsg(t('admin.error.order'), true);
+      fetchAll();
+    }
+  };
+
+  const handleMoveAnnouncement = async (index, direction) => {
+    const updated = [...announcements];
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= updated.length) return;
+
+    const temp = updated[index];
+    updated[index] = updated[targetIndex];
+    updated[targetIndex] = temp;
+
+    setAnnouncements(updated);
+
+    try {
+      const orderedIds = updated.map(a => a.id);
+      await announcementService.updateOrder(orderedIds);
+      showMsg(t('admin.msg.orderUpdated'));
+    } catch {
+      showMsg(t('admin.error.order'), true);
+      fetchAll();
+    }
+  };
+
   const tabs = [
     { key: 'pending', label: t('admin.tab.pending'), count: pendingUsers.length },
     { key: 'members', label: t('admin.tab.members'), count: allUsers.length },
@@ -246,7 +317,7 @@ export default function AdminPage() {
                           </div>
                           <div>
                             <div style={{ fontWeight: 700, fontSize: 15, fontFamily: 'Cinzel, serif', marginBottom: 3 }}>
-                              {u.username}
+                              {u.username} <span style={{ opacity: 0.5, fontSize: 12, fontWeight: 400 }}>#{u.id}</span>
                             </div>
                             <span style={{ fontSize: 10, background: 'rgba(212,160,23,0.15)', color: 'var(--gold-primary)', padding: '4px 8px', borderRadius: 4, letterSpacing: '0.05em' }}>{t('admin.badge.pending')}</span>
                           </div>
@@ -277,13 +348,20 @@ export default function AdminPage() {
                           </div>
                           <div>
                             <div style={{ fontWeight: 700, fontSize: 14, fontFamily: 'Cinzel, serif', marginBottom: 3 }}>
-                              {u.username}
+                              {u.username} <span style={{ opacity: 0.5, fontSize: 11, fontWeight: 400 }}>#{u.id}</span>
                             </div>
                             <span className={`badge-wow ${u.role === 'ADMIN' ? 'badge-admin-wow' : 'badge-user-wow'}`}>{u.role}</span>
                           </div>
                         </div>
                         {u.role !== 'ADMIN' && (
-                          <button className="btn-danger-wow" onClick={() => handleDelete(u.id)}>{t('admin.btn.delete')}</button>
+                          <div style={{ display: 'flex', gap: 8 }}>
+                            <button className="wow-btn-outline" style={{ padding: '6px 12px', fontSize: 11 }} onClick={() => handleOpenResetModal(u)}>
+                              {t('admin.btn.reset_password')}
+                            </button>
+                            <button className="btn-danger-wow" style={{ padding: '6px 12px', fontSize: 11 }} onClick={() => handleDelete(u.id)}>
+                              {t('admin.btn.delete')}
+                            </button>
+                          </div>
                         )}
                       </div>
                     ))}
@@ -369,11 +447,17 @@ export default function AdminPage() {
                             )}
                           </div>
                         </div>
-                        <div style={{ display: 'flex', gap: 8 }}>
-                          <button className="wow-btn-outline" style={{ padding: '4px 10px', fontSize: 11 }} onClick={() => handleEditEvent(evt)}>
+                        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                          <button type="button" className="wow-btn-outline" style={{ padding: '4px 8px', fontSize: 10 }} disabled={idx === 0} onClick={() => handleMoveEvent(idx, 'up')}>
+                            ▲
+                          </button>
+                          <button type="button" className="wow-btn-outline" style={{ padding: '4px 8px', fontSize: 10 }} disabled={idx === events.length - 1} onClick={() => handleMoveEvent(idx, 'down')}>
+                            ▼
+                          </button>
+                          <button type="button" className="wow-btn-outline" style={{ padding: '4px 10px', fontSize: 11 }} onClick={() => handleEditEvent(evt)}>
                             {t('admin.btn.edit')}
                           </button>
-                          <button className="btn-danger-wow" onClick={() => handleDeleteEvent(evt.id, evt.title)}>
+                          <button type="button" className="btn-danger-wow" onClick={() => handleDeleteEvent(evt.id, evt.title)}>
                             {t('admin.btn.delete')}
                           </button>
                         </div>
@@ -430,17 +514,23 @@ export default function AdminPage() {
                   </div>
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                    {announcements.map((ann) => (
+                    {announcements.map((ann, idx) => (
                       <div key={ann.id} className="wow-card" style={{ padding: '14px 20px', display: 'flex', flexDirection: 'column', gap: 12, borderLeft: `4px solid ${COL_COLORS[ann.colorKey]?.border || 'var(--border-gold)'}` }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                           <span style={{ fontSize: 13, color: 'var(--text-primary)', whiteSpace: 'pre-wrap' }}>
                             {ann.content}
                           </span>
-                          <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-                            <button className="wow-btn-outline" style={{ padding: '4px 10px', fontSize: 11 }} onClick={() => handleEditAnnouncement(ann)}>
+                          <div style={{ display: 'flex', gap: 6, flexShrink: 0, alignItems: 'center' }}>
+                            <button type="button" className="wow-btn-outline" style={{ padding: '4px 8px', fontSize: 10 }} disabled={idx === 0} onClick={() => handleMoveAnnouncement(idx, 'up')}>
+                              ▲
+                            </button>
+                            <button type="button" className="wow-btn-outline" style={{ padding: '4px 8px', fontSize: 10 }} disabled={idx === announcements.length - 1} onClick={() => handleMoveAnnouncement(idx, 'down')}>
+                              ▼
+                            </button>
+                            <button type="button" className="wow-btn-outline" style={{ padding: '4px 10px', fontSize: 11 }} onClick={() => handleEditAnnouncement(ann)}>
                               {t('admin.btn.edit')}
                             </button>
-                            <button className="btn-danger-wow" onClick={() => handleDeleteAnnouncement(ann.id)}>
+                            <button type="button" className="btn-danger-wow" onClick={() => handleDeleteAnnouncement(ann.id)}>
                               {t('admin.btn.delete')}
                             </button>
                           </div>
@@ -457,6 +547,40 @@ export default function AdminPage() {
           </>
         )}
       </div>
+
+      {/* Reset Password Modal */}
+      {resetModalOpen && resetUser && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 2000, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+          <div className="wow-card animate-fadeInUp" style={{ width: '100%', maxWidth: 400, padding: '24px 28px', border: '2px solid var(--border-gold)', background: 'var(--bg-card)' }}>
+            <h3 className="font-wow gradient-gold" style={{ fontSize: 16, marginBottom: 16, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              {t('admin.reset_password.title', { username: resetUser.username })}
+            </h3>
+            <form onSubmit={handleResetPassword} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <label style={{ fontSize: 10, color: 'var(--text-secondary)', letterSpacing: '0.1em', fontFamily: 'Cinzel, serif', fontWeight: 700 }}>
+                  {t('admin.reset_password.input')}
+                </label>
+                <input
+                  type="text"
+                  className="wow-input"
+                  required
+                  value={newPasswordInput}
+                  onChange={(e) => setNewPasswordInput(e.target.value)}
+                  placeholder="min. 6"
+                />
+              </div>
+              <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
+                <button type="submit" className="btn-gold" style={{ flex: 1, padding: '10px' }}>
+                  {t('admin.btn.save')}
+                </button>
+                <button type="button" className="btn-danger-wow" onClick={() => { setResetModalOpen(false); setResetUser(null); }} style={{ flex: 1, padding: '10px' }}>
+                  {t('confirm.cancel')}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

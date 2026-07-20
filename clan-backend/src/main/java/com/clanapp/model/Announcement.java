@@ -25,6 +25,10 @@ public class Announcement {
     @Column(nullable = false)
     private int colorKey; // Matches event color palettes
 
+    @Column(name = "sort_order", nullable = false, columnDefinition = "int default 0")
+    @Builder.Default
+    private Integer sortOrder = 0;
+
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;

@@ -5,4 +5,5 @@ export const eventService = {
   create: (data) => api.post('/events', data),
   update: (id, data) => api.put(`/events/${id}`, data),
   delete: (id) => api.delete(`/events/${id}`),
+  updateOrder: (ids) => api.put('/events/order', ids),
 };

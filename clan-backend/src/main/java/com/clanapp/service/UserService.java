@@ -20,6 +20,52 @@ public class UserService {
     private final UserRepository userRepository;
     private final EventSubmissionRepository submissionRepository;
     private final CloudinaryService cloudinaryService;
+    private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+    private final com.clanapp.security.JwtUtil jwtUtil;
+
+    /** Admin tarafından şifre sıfırlama */
+    @Transactional
+    public void resetPasswordByAdmin(Long userId, String newPassword) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Kullanıcı bulunamadı: " + userId));
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
+    /** Kullanıcının kendi şifresini değiştirmesi */
+    @Transactional
+    public void updatePassword(String username, String currentPassword, String newPassword) {
+        User user = userRepository.findByUsernameIgnoreCase(username)
+                .orElseThrow(() -> new IllegalArgumentException("Kullanıcı bulunamadı."));
+        if (user.getRole() == com.clanapp.model.Role.ADMIN) {
+            throw new IllegalArgumentException("auth.error.admin_cannot_change");
+        }
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new IllegalArgumentException("auth.error.incorrect_current_password");
+        }
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
+    /** Kullanıcının kendi kullanıcı adını değiştirmesi */
+    @Transactional
+    public com.clanapp.dto.UpdateUsernameResponse updateUsername(String currentUsername, String newUsername) {
+        User user = userRepository.findByUsernameIgnoreCase(currentUsername)
+                .orElseThrow(() -> new IllegalArgumentException("Kullanıcı bulunamadı."));
+        if (user.getRole() == com.clanapp.model.Role.ADMIN) {
+            throw new IllegalArgumentException("auth.error.admin_cannot_change");
+        }
+
+        if (!currentUsername.equalsIgnoreCase(newUsername) && userRepository.existsByUsernameIgnoreCase(newUsername)) {
+            throw new IllegalArgumentException("auth.error.username_taken");
+        }
+
+        user.setUsername(newUsername);
+        userRepository.save(user);
+
+        String token = jwtUtil.generateToken(user.getUsername(), user.getRole().name());
+        return new com.clanapp.dto.UpdateUsernameResponse(token, user.getUsername(), user.getRole().name());
+    }
 
     /** Onay bekleyen kullanıcı listesi */
     public List<UserResponse> getPendingUsers() {

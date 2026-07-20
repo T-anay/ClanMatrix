@@ -23,7 +23,7 @@ public class EventService {
 
     /** Tüm etkinlikleri listele */
     public List<Event> getAllEvents() {
-        return eventRepository.findAll();
+        return eventRepository.findAllByOrderBySortOrderAsc();
     }
 
     /** Yeni etkinlik oluştur (10 limit kontrolü dahil) */
@@ -42,15 +42,34 @@ public class EventService {
             ? request.getColorKey()
             : (int)(count % 10);
 
+        // Sıralama numarasını en büyük sıranın bir fazlası yap
+        int maxOrder = eventRepository.findAll().stream()
+                .mapToInt(e -> e.getSortOrder() != null ? e.getSortOrder() : 0)
+                .max()
+                .orElse(0);
+
         Event event = Event.builder()
                 .title(request.getTitle())
                 .colorKey(colorKey)
                 .startDate(request.getStartDate())
                 .endDate(request.getEndDate())
+                .sortOrder(maxOrder + 1)
                 .build();
 
         return eventRepository.save(event);
 
+    }
+
+    /** Etkinlik sıralamasını güncelle */
+    @Transactional
+    public void updateEventOrder(List<Long> orderedIds) {
+        for (int i = 0; i < orderedIds.size(); i++) {
+            Long id = orderedIds.get(i);
+            Event event = eventRepository.findById(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Etkinlik bulunamadı: " + id));
+            event.setSortOrder(i);
+            eventRepository.save(event);
+        }
     }
 
     /** Etkinlik Güncelle (Başlık ve Tarihler) */

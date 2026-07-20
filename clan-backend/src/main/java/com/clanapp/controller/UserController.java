@@ -47,4 +47,34 @@ public class UserController {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
+
+    /** Kullanıcının şifresini sıfırla — Yalnızca ADMIN */
+    @PutMapping("/{id}/reset-password")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> resetPasswordByAdmin(
+            @PathVariable Long id,
+            @jakarta.validation.Valid @RequestBody com.clanapp.dto.ResetPasswordRequest request) {
+        userService.resetPasswordByAdmin(id, request.getNewPassword());
+        return ResponseEntity.ok().build();
+    }
+
+    /** Kendi şifresini güncelle — USER ve ADMIN */
+    @PutMapping("/profile/password")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public ResponseEntity<Void> updatePassword(
+            java.security.Principal principal,
+            @jakarta.validation.Valid @RequestBody com.clanapp.dto.UpdatePasswordRequest request) {
+        userService.updatePassword(principal.getName(), request.getCurrentPassword(), request.getNewPassword());
+        return ResponseEntity.ok().build();
+    }
+
+    /** Kendi kullanıcı adını güncelle — USER ve ADMIN */
+    @PutMapping("/profile/username")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public ResponseEntity<com.clanapp.dto.UpdateUsernameResponse> updateUsername(
+            java.security.Principal principal,
+            @jakarta.validation.Valid @RequestBody com.clanapp.dto.UpdateUsernameRequest request) {
+        com.clanapp.dto.UpdateUsernameResponse response = userService.updateUsername(principal.getName(), request.getNewUsername());
+        return ResponseEntity.ok(response);
+    }
 }

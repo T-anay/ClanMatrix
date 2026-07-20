@@ -19,6 +19,16 @@ export default function RegisterPage() {
     e.preventDefault();
     setError('');
 
+    if (username.trim().length < 3 || username.trim().length > 50) {
+      setError(t('auth.register.rules.username'));
+      return;
+    }
+
+    if (password.length < 6) {
+      setError(t('auth.register.rules.password'));
+      return;
+    }
+
     if (password !== confirmPassword) {
       setError(t('error.password_mismatch'));
       return;
@@ -29,14 +39,17 @@ export default function RegisterPage() {
       await authService.register({ username, password });
       navigate('/pending-approval');
     } catch (err) {
-      if (err.response?.status === 401) {
+      const serverMsg = err.response?.data?.message || err.response?.data;
+      if (err.response?.status === 400 && typeof serverMsg === 'string') {
+        setError(serverMsg.startsWith('auth.error') ? t(serverMsg) : serverMsg);
+      } else if (err.response?.status === 401) {
         setError(t('error.401'));
       } else if (err.response?.status === 403) {
         setError(t('error.403'));
       } else if (!err.response) {
         setError(t('error.network'));
       } else {
-        setError(t('error.default'));
+        setError(typeof serverMsg === 'string' && serverMsg.startsWith('auth.error') ? t(serverMsg) : t('error.default'));
       }
     } finally {
       setLoading(false);
@@ -146,6 +159,9 @@ export default function RegisterPage() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
               />
+              <span style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2, fontFamily: 'sans-serif' }}>
+                {t('auth.register.rules.username')}
+              </span>
             </div>
 
             {/* Password */}
@@ -185,6 +201,9 @@ export default function RegisterPage() {
                   {showPassword ? t('auth.login.hide') : t('auth.login.show')}
                 </button>
               </div>
+              <span style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2, fontFamily: 'sans-serif' }}>
+                {t('auth.register.rules.password')}
+              </span>
             </div>
 
             {/* Confirm Password */}
