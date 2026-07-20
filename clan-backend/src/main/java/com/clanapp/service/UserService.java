@@ -37,7 +37,7 @@ public class UserService {
     public void updatePassword(String username, String currentPassword, String newPassword) {
         User user = userRepository.findByUsernameIgnoreCase(username)
                 .orElseThrow(() -> new IllegalArgumentException("Kullanıcı bulunamadı."));
-        if (user.getRole() == com.clanapp.model.Role.ADMIN) {
+        if (user.getRole() == com.clanapp.model.User.Role.ADMIN) {
             throw new IllegalArgumentException("auth.error.admin_cannot_change");
         }
         if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
@@ -52,7 +52,7 @@ public class UserService {
     public com.clanapp.dto.UpdateUsernameResponse updateUsername(String currentUsername, String newUsername) {
         User user = userRepository.findByUsernameIgnoreCase(currentUsername)
                 .orElseThrow(() -> new IllegalArgumentException("Kullanıcı bulunamadı."));
-        if (user.getRole() == com.clanapp.model.Role.ADMIN) {
+        if (user.getRole() == com.clanapp.model.User.Role.ADMIN) {
             throw new IllegalArgumentException("auth.error.admin_cannot_change");
         }
 
