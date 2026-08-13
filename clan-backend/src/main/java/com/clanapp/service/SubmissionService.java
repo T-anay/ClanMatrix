@@ -24,7 +24,7 @@ public class SubmissionService {
     private final EventSubmissionRepository submissionRepository;
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
-    private final CloudinaryService cloudinaryService;
+    private final StorageService storageService;
 
     /** Tüm submission'ları matris formatında getir */
     public List<SubmissionResponse> getAllSubmissions() {
@@ -47,8 +47,8 @@ public class SubmissionService {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new IllegalArgumentException("Etkinlik bulunamadı: " + eventId));
 
-        // Cloudinary'ye yükle
-        Map<String, String> uploadResult = cloudinaryService.upload(file, "clan-matrix/" + eventId);
+        // S3'e yükle
+        Map<String, String> uploadResult = storageService.upload(file, "clan-matrix/" + eventId);
         String newUrl = uploadResult.get("url");
         String newPublicId = uploadResult.get("public_id");
 
@@ -64,8 +64,8 @@ public class SubmissionService {
             // Güncelleme: eski resmi sil
             submission = existing.get();
             try {
-                cloudinaryService.delete(submission.getCloudinaryPublicId());
-            } catch (IOException e) {
+                storageService.delete(submission.getCloudinaryPublicId());
+            } catch (Exception e) {
                 // Silme başarısız olsa da devam et, yeni resim kaydedilsin
             }
             submission.setImageUrl(newUrl);
@@ -91,9 +91,9 @@ public class SubmissionService {
 
         if (submission.getCloudinaryPublicId() != null) {
             try {
-                cloudinaryService.delete(submission.getCloudinaryPublicId());
-            } catch (IOException e) {
-                System.err.println("Cloudinary silme hatası: " + e.getMessage());
+                storageService.delete(submission.getCloudinaryPublicId());
+            } catch (Exception e) {
+                System.err.println("S3 silme hatası: " + e.getMessage());
             }
         }
         

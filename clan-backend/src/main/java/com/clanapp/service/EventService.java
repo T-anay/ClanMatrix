@@ -19,7 +19,7 @@ public class EventService {
 
     private final EventRepository eventRepository;
     private final EventSubmissionRepository submissionRepository;
-    private final CloudinaryService cloudinaryService;
+    private final StorageService storageService;
 
     /** Tüm etkinlikleri listele */
     public List<Event> getAllEvents() {
@@ -99,11 +99,11 @@ public class EventService {
         // 1. Etkinliğe ait tüm resimleri/katılımları bul
         List<EventSubmission> submissions = submissionRepository.findByEventId(eventId);
         for (EventSubmission sub : submissions) {
-            // 2. Resimleri Cloudinary'den sil
+            // 2. Resimleri S3'ten sil
             try {
-                cloudinaryService.delete(sub.getCloudinaryPublicId());
+                storageService.delete(sub.getCloudinaryPublicId());
             } catch (Exception e) {
-                System.err.println("Cloudinary silme hatası (Public ID: " + sub.getCloudinaryPublicId() + "): " + e.getMessage());
+                System.err.println("S3 silme hatası (Public ID: " + sub.getCloudinaryPublicId() + "): " + e.getMessage());
             }
             // 3. Veritabanından kaydı sil
             submissionRepository.delete(sub);

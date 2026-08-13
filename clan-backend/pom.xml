@@ -108,11 +108,18 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- Cloudinary -->
+        <!-- AWS S3 for Cloudflare R2 -->
         <dependency>
-            <groupId>com.cloudinary</groupId>
-            <artifactId>cloudinary-http44</artifactId>
-            <version>1.39.0</version>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3</artifactId>
+            <version>2.29.39</version>
+        </dependency>
+
+        <!-- Thumbnailator for Image Compression -->
+        <dependency>
+            <groupId>net.coobird</groupId>
+            <artifactId>thumbnailator</artifactId>
+            <version>0.4.20</version>
         </dependency>
 
         <!-- Test -->

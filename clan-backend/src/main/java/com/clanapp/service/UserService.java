@@ -19,7 +19,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final EventSubmissionRepository submissionRepository;
-    private final CloudinaryService cloudinaryService;
+    private final StorageService storageService;
     private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
     private final com.clanapp.security.JwtUtil jwtUtil;
 
@@ -104,10 +104,10 @@ public class UserService {
         for (EventSubmission submission : userSubmissions) {
             if (submission.getCloudinaryPublicId() != null) {
                 try {
-                    cloudinaryService.delete(submission.getCloudinaryPublicId());
-                    log.info("Kullanıcı silindiği için resmi Cloudinary'den silindi: {}", submission.getCloudinaryPublicId());
+                    storageService.delete(submission.getCloudinaryPublicId());
+                    log.info("Kullanıcı silindiği için resmi S3'ten silindi: {}", submission.getCloudinaryPublicId());
                 } catch (Exception e) {
-                    log.error("Cloudinary resim silinirken hata oluştu (Kullanıcı Silinmesi): {}", e.getMessage());
+                    log.error("S3 resim silinirken hata oluştu (Kullanıcı Silinmesi): {}", e.getMessage());
                 }
             }
         }
