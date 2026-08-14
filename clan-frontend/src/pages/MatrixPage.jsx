@@ -54,6 +54,13 @@ export default function MatrixPage() {
   const [filterEventId, setFilterEventId] = useState('all');
   const [filterStatus, setFilterStatus] = useState('joined');
   
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, sortOrder, filterEventId, filterStatus, itemsPerPage]);
+
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedCell, setSelectedCell] = useState(null);
   const [previewData, setPreviewData] = useState(null);
@@ -131,6 +138,13 @@ export default function MatrixPage() {
     if (meIncluded) return [me, ...filtered];
     return filtered;
   }, [users, searchTerm, sortOrder, filterEventId, filterStatus, user.username, submissionMap]);
+
+  const paginatedUsers = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return sortedUsers.slice(startIndex, startIndex + itemsPerPage);
+  }, [sortedUsers, currentPage, itemsPerPage]);
+
+  const totalPages = Math.ceil(sortedUsers.length / itemsPerPage);
 
   const handleCellClick = (rowUser, event, submission) => {
     // If the user already uploaded, nobody can change it via UploadModal anymore. 
@@ -377,7 +391,7 @@ export default function MatrixPage() {
                       {t('matrix.noresults')}
                     </div>
                   ) : (
-                    sortedUsers.map((rowUser, idx) => {
+                    paginatedUsers.map((rowUser, idx) => {
                       const isMe = rowUser.username === user.username;
                       const myCount = submissionMap[rowUser.id] ? Object.keys(submissionMap[rowUser.id]).length : 0;
 
@@ -457,6 +471,57 @@ export default function MatrixPage() {
                       );
                     })
                   )}
+                </div>
+              </div>
+            )}
+
+            {/* Pagination Controls */}
+            {sortedUsers.length > 0 && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 20, padding: '10px 0', fontFamily: 'Cinzel, serif', color: 'var(--text-primary)' }}>
+                <div style={{ fontSize: 12 }}>
+                  {t('matrix.pagination.show')}: 
+                  <select 
+                    className="wow-input" 
+                    style={{ marginLeft: 8, padding: '4px 8px', fontSize: 12, appearance: 'auto', display: 'inline-block', width: 'auto' }}
+                    value={itemsPerPage}
+                    onChange={(e) => setItemsPerPage(Number(e.target.value))}
+                  >
+                    <option value={10}>10</option>
+                    <option value={25}>25</option>
+                    <option value={50}>50</option>
+                    <option value={100}>100</option>
+                  </select>
+                </div>
+
+                <div style={{ 
+                  display: 'flex', 
+                  gap: 12, 
+                  alignItems: 'center', 
+                  background: 'var(--bg-secondary)', 
+                  border: '1px solid var(--border-gold)', 
+                  padding: '6px 14px', 
+                  borderRadius: 8,
+                  boxShadow: 'var(--shadow-card)' 
+                }}>
+                  <button 
+                    className="btn-wow"
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    style={{ padding: '6px 12px', fontSize: 12, opacity: currentPage === 1 ? 0.5 : 1, cursor: currentPage === 1 ? 'not-allowed' : 'pointer' }}
+                  >
+                    {t('matrix.pagination.prev')}
+                  </button>
+                  <span style={{ fontSize: 13 }}>
+                    {currentPage} / {totalPages || 1}
+                  </span>
+                  <button 
+                    className="btn-wow"
+                    disabled={currentPage >= totalPages}
+                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                    style={{ padding: '6px 12px', fontSize: 12, opacity: currentPage >= totalPages ? 0.5 : 1, cursor: currentPage >= totalPages ? 'not-allowed' : 'pointer' }}
+                  >
+                    {t('matrix.pagination.next')}
+                  </button>
                 </div>
               </div>
             )}
