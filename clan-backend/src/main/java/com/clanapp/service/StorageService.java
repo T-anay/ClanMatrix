@@ -42,21 +42,7 @@ public class StorageService {
         String fileName = UUID.randomUUID().toString() + extension;
         String objectKey = folder + "/" + fileName;
 
-        byte[] imageBytes;
-        
-        // Sadece resim formatları için sıkıştırma yap (Genişlik max 1280px, Kalite %80)
-        String contentType = file.getContentType();
-        if (contentType != null && contentType.startsWith("image/")) {
-            try (java.io.ByteArrayOutputStream os = new java.io.ByteArrayOutputStream()) {
-                net.coobird.thumbnailator.Thumbnails.of(file.getInputStream())
-                        .size(1280, 1280)
-                        .outputQuality(0.8)
-                        .toOutputStream(os);
-                imageBytes = os.toByteArray();
-            }
-        } else {
-            imageBytes = file.getBytes();
-        }
+        byte[] imageBytes = file.getBytes();
 
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                 .bucket(bucketName)
