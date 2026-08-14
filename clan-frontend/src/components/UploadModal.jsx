@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useModal } from '../context/ModalContext';
+import imageCompression from 'browser-image-compression';
 
 export default function UploadModal({ isOpen, onClose, onUpload, eventTitle }) {
   const { t } = useLanguage();
@@ -35,7 +36,22 @@ export default function UploadModal({ isOpen, onClose, onUpload, eventTitle }) {
     if (!file) return;
     setUploading(true);
     try {
-      await onUpload(file);
+      const options = {
+        maxSizeMB: 0.5, // 500 KB target
+        maxWidthOrHeight: 1080,
+        useWebWorker: true,
+        fileType: 'image/webp',
+        initialQuality: 0.85
+      };
+      
+      const compressedBlob = await imageCompression(file, options);
+      const compressedFile = new File(
+        [compressedBlob], 
+        file.name.replace(/\.[^/.]+$/, "") + ".webp", 
+        { type: 'image/webp' }
+      );
+      
+      await onUpload(compressedFile);
       handleClose();
     } catch {
       // error handled in parent
