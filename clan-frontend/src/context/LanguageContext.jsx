@@ -40,6 +40,8 @@ const translations = {
     'auth.error.pending_approval': 'Hesabınız yönetici onayı bekliyor.',
     'auth.error.invalid_credentials': 'Kullanıcı adı veya şifre hatalı.',
     'auth.error.admin_cannot_change': 'Yönetici (Admin) bilgileri güvenlik amacıyla değiştirilemez.',
+    'auth.error.admin_only_login': 'Şu an sadece yöneticiler (Admin) giriş yapabilir.',
+
     
     // Errors
     'error.401': 'Giriş bilgilerinizi kontrol edin. Eğer doğruysa hesabınız henüz onaylanmamış olabilir.',
@@ -232,6 +234,8 @@ const translations = {
     'auth.error.pending_approval': 'Your account is pending leader approval.',
     'auth.error.invalid_credentials': 'Invalid username or password.',
     'auth.error.admin_cannot_change': 'Administrator credentials cannot be modified for security reasons.',
+    'auth.error.admin_only_login': 'Currently, only administrators (Admin) can log in.',
+
 
     // Errors
     'error.401': 'Please check your login details. If they are correct, your account might not be approved yet.',

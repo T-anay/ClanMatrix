@@ -44,6 +44,10 @@ public class AuthService {
             throw new IllegalStateException("auth.error.pending_approval");
         }
 
+        if (user.getRole() != User.Role.ADMIN) {
+            throw new IllegalStateException("auth.error.admin_only_login");
+        }
+
         String token = jwtUtil.generateToken(user.getUsername(), user.getRole().name());
         return new LoginResponse(token, user.getUsername(), user.getRole().name());
     }

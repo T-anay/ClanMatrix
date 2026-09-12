@@ -11,29 +11,29 @@ import { useLanguage } from '../context/LanguageContext';
 import { useModal } from '../context/ModalContext';
 
 const DARK_COLORS = [
-  { bg: 'rgba(26,107,191,0.15)',  border: '#1a6bbf', header: '#4a9fe8' },
-  { bg: 'rgba(45,122,58,0.15)',   border: '#2d7a3a', header: '#5dcc78' },
-  { bg: 'rgba(139,45,139,0.15)',  border: '#8b2d8b', header: '#cc6acc' },
-  { bg: 'rgba(192,64,32,0.15)',   border: '#c04020', header: '#e87050' },
-  { bg: 'rgba(26,122,122,0.15)',  border: '#1a7a7a', header: '#4acccc' },
-  { bg: 'rgba(139,105,20,0.15)',  border: '#8b6914', header: '#d4a840' },
-  { bg: 'rgba(90,45,139,0.15)',   border: '#5a2d8b', header: '#9a6adb' },
-  { bg: 'rgba(45,107,45,0.15)',   border: '#2d6b2d', header: '#6acc6a' },
-  { bg: 'rgba(139,45,58,0.15)',   border: '#8b2d3a', header: '#e06a78' },
-  { bg: 'rgba(26,74,139,0.15)',   border: '#1a4a8b', header: '#4a88e8' },
+  { bg: 'rgba(26,107,191,0.15)', border: '#1a6bbf', header: '#4a9fe8' },
+  { bg: 'rgba(45,122,58,0.15)', border: '#2d7a3a', header: '#5dcc78' },
+  { bg: 'rgba(139,45,139,0.15)', border: '#8b2d8b', header: '#cc6acc' },
+  { bg: 'rgba(192,64,32,0.15)', border: '#c04020', header: '#e87050' },
+  { bg: 'rgba(26,122,122,0.15)', border: '#1a7a7a', header: '#4acccc' },
+  { bg: 'rgba(139,105,20,0.15)', border: '#8b6914', header: '#d4a840' },
+  { bg: 'rgba(90,45,139,0.15)', border: '#5a2d8b', header: '#9a6adb' },
+  { bg: 'rgba(45,107,45,0.15)', border: '#2d6b2d', header: '#6acc6a' },
+  { bg: 'rgba(139,45,58,0.15)', border: '#8b2d3a', header: '#e06a78' },
+  { bg: 'rgba(26,74,139,0.15)', border: '#1a4a8b', header: '#4a88e8' },
 ];
 
 const LIGHT_COLORS = [
-  { bg: 'rgba(26,107,191,0.08)',  border: '#1a6bbf', header: '#0d4b99' },
-  { bg: 'rgba(45,122,58,0.08)',   border: '#2d7a3a', header: '#185925' },
-  { bg: 'rgba(139,45,139,0.08)',  border: '#8b2d8b', header: '#661b66' },
-  { bg: 'rgba(192,64,32,0.08)',   border: '#c04020', header: '#99260c' },
-  { bg: 'rgba(26,122,122,0.08)',  border: '#1a7a7a', header: '#0d5959' },
-  { bg: 'rgba(139,105,20,0.08)',  border: '#8b6914', header: '#664a0a' },
-  { bg: 'rgba(90,45,139,0.08)',   border: '#5a2d8b', header: '#3b1666' },
-  { bg: 'rgba(45,107,45,0.08)',   border: '#2d6b2d', header: '#184a18' },
-  { bg: 'rgba(139,45,58,0.08)',   border: '#8b2d3a', header: '#661623' },
-  { bg: 'rgba(26,74,139,0.08)',   border: '#1a4a8b', header: '#0d2d66' },
+  { bg: 'rgba(26,107,191,0.08)', border: '#1a6bbf', header: '#0d4b99' },
+  { bg: 'rgba(45,122,58,0.08)', border: '#2d7a3a', header: '#185925' },
+  { bg: 'rgba(139,45,139,0.08)', border: '#8b2d8b', header: '#661b66' },
+  { bg: 'rgba(192,64,32,0.08)', border: '#c04020', header: '#99260c' },
+  { bg: 'rgba(26,122,122,0.08)', border: '#1a7a7a', header: '#0d5959' },
+  { bg: 'rgba(139,105,20,0.08)', border: '#8b6914', header: '#664a0a' },
+  { bg: 'rgba(90,45,139,0.08)', border: '#5a2d8b', header: '#3b1666' },
+  { bg: 'rgba(45,107,45,0.08)', border: '#2d6b2d', header: '#184a18' },
+  { bg: 'rgba(139,45,58,0.08)', border: '#8b2d3a', header: '#661623' },
+  { bg: 'rgba(26,74,139,0.08)', border: '#1a4a8b', header: '#0d2d66' },
 ];
 
 export default function MatrixPage() {
@@ -41,22 +41,22 @@ export default function MatrixPage() {
   const { theme } = useTheme();
   const { t } = useLanguage();
   const { confirm } = useModal();
-  
+
   const [events, setEvents] = useState([]);
   const [submissions, setSubmissions] = useState([]);
   const [users, setUsers] = useState([]);
   const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  
+
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState('asc');
   const [filterEventId, setFilterEventId] = useState('all');
   const [filterStatus, setFilterStatus] = useState('joined');
-  
+
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-  
+
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, sortOrder, filterEventId, filterStatus, itemsPerPage]);
@@ -64,7 +64,7 @@ export default function MatrixPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedCell, setSelectedCell] = useState(null);
   const [previewData, setPreviewData] = useState(null);
-  
+
   const [uploadSuccess, setUploadSuccess] = useState('');
   const [uploadError, setUploadError] = useState('');
 
@@ -99,7 +99,7 @@ export default function MatrixPage() {
   const sortedUsers = useMemo(() => {
     const others = users.filter(u => u.username !== user.username);
     let filtered = others.filter(u => u.username.toLowerCase().includes(searchTerm.toLowerCase()));
-    
+
     if (filterEventId !== 'all') {
       filtered = filtered.filter(u => {
         const hasSub = !!submissionMap[u.id]?.[filterEventId];
@@ -110,10 +110,10 @@ export default function MatrixPage() {
     filtered.sort((a, b) => {
       if (sortOrder === 'asc') return a.username.localeCompare(b.username);
       if (sortOrder === 'desc') return b.username.localeCompare(a.username);
-      
+
       const countA = submissionMap[a.id] ? Object.keys(submissionMap[a.id]).length : 0;
       const countB = submissionMap[b.id] ? Object.keys(submissionMap[b.id]).length : 0;
-      
+
       if (sortOrder === 'most') {
         if (countA !== countB) return countB - countA;
         return a.username.localeCompare(b.username);
@@ -211,7 +211,7 @@ export default function MatrixPage() {
       <div className="page-padding" style={{ padding: '28px 24px', maxWidth: 1600, margin: '0 auto' }}>
 
         <div className="matrix-layout-container" style={{ display: 'flex', gap: 24, flexDirection: 'row', alignItems: 'flex-start' }}>
-          
+
           {/* ASIDE: Announcements */}
           <aside className="matrix-aside" style={{ width: 280, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 16 }}>
             <h2 className="font-wow gradient-gold" style={{ fontSize: 16, borderBottom: '1px solid var(--border-gold)', paddingBottom: 8, letterSpacing: '0.04em' }}>
@@ -260,8 +260,8 @@ export default function MatrixPage() {
 
             {/* Alerts */}
             {uploadSuccess && <div className="wow-alert-success" style={{ marginBottom: 14 }}>{uploadSuccess}</div>}
-            {uploadError   && <div className="wow-alert-error"   style={{ marginBottom: 14 }}>{uploadError}</div>}
-            {error         && <div className="wow-alert-error"   style={{ marginBottom: 14 }}>{error}</div>}
+            {uploadError && <div className="wow-alert-error" style={{ marginBottom: 14 }}>{uploadError}</div>}
+            {error && <div className="wow-alert-error" style={{ marginBottom: 14 }}>{error}</div>}
 
             {/* Toolbar */}
             <div className="matrix-toolbar" style={{ display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
@@ -356,7 +356,7 @@ export default function MatrixPage() {
                       const palette = theme === 'light' ? LIGHT_COLORS : DARK_COLORS;
                       const col = palette[(event.colorKey ?? 0) % palette.length];
                       const eventSubCount = submissions.filter(s => s?.event?.id === event.id || s.eventId === event.id).length;
-                      
+
                       const startDateStr = event.startDate ? new Date(event.startDate).toLocaleDateString() : '';
                       const endDateStr = event.endDate ? new Date(event.endDate).toLocaleDateString() : '';
 
@@ -479,9 +479,9 @@ export default function MatrixPage() {
             {sortedUsers.length > 0 && (
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 20, padding: '10px 0', fontFamily: 'Cinzel, serif', color: 'var(--text-primary)' }}>
                 <div style={{ fontSize: 12 }}>
-                  {t('matrix.pagination.show')}: 
-                  <select 
-                    className="wow-input" 
+                  {t('matrix.pagination.show')}:
+                  <select
+                    className="wow-input"
                     style={{ marginLeft: 8, padding: '4px 8px', fontSize: 12, appearance: 'auto', display: 'inline-block', width: 'auto' }}
                     value={itemsPerPage}
                     onChange={(e) => setItemsPerPage(Number(e.target.value))}
@@ -493,17 +493,17 @@ export default function MatrixPage() {
                   </select>
                 </div>
 
-                <div style={{ 
-                  display: 'flex', 
-                  gap: 12, 
-                  alignItems: 'center', 
-                  background: 'var(--bg-secondary)', 
-                  border: '1px solid var(--border-gold)', 
-                  padding: '6px 14px', 
+                <div style={{
+                  display: 'flex',
+                  gap: 12,
+                  alignItems: 'center',
+                  background: 'var(--bg-secondary)',
+                  border: '1px solid var(--border-gold)',
+                  padding: '6px 14px',
                   borderRadius: 8,
-                  boxShadow: 'var(--shadow-card)' 
+                  boxShadow: 'var(--shadow-card)'
                 }}>
-                  <button 
+                  <button
                     className="btn-wow"
                     disabled={currentPage === 1}
                     onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
@@ -514,7 +514,7 @@ export default function MatrixPage() {
                   <span style={{ fontSize: 13 }}>
                     {currentPage} / {totalPages || 1}
                   </span>
-                  <button 
+                  <button
                     className="btn-wow"
                     disabled={currentPage >= totalPages}
                     onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
@@ -544,7 +544,7 @@ export default function MatrixPage() {
             </div>
             {/* Admin Delete Button on Preview */}
             {user?.role === 'ADMIN' && (
-              <button 
+              <button
                 className="btn-danger-wow"
                 onClick={(e) => {
                   e.stopPropagation();
