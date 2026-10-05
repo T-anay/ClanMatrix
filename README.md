@@ -1,186 +1,211 @@
-# ⚔️ ClanMatrix — Klan Etkinlik Takip Sistemi
+# ⚔️ ClanMatrix
 
-> Klan üyelerinin etkinliklere katılımını Excel benzeri bir matris tabloda takip eden, admin onaylı üyelik sistemi ile güvenli full-stack web uygulaması.
+> Clan Activity Tracking System — Personal Project
+> Klan Etkinlik Takip Sistemi — Kişisel Proje
+
+**Live Demo / Canlı Demo:** [clanmatrix.vercel.app](https://clanmatrix.vercel.app)
 
 ---
 
-## 🏗️ Teknoloji Yığını
+## 🇬🇧 English
 
-| Katman | Teknoloji |
-|--------|-----------|
+ClanMatrix is a full-stack web application for tracking clan members' participation in events and activities using an Excel-like matrix table. Members can register and request to join, while admins approve memberships and manage events. Built as a personal hobby project.
+
+### Features
+
+- **Activity Matrix** — Visualize member-event participation in a spreadsheet-style grid
+- **Admin Approval System** — New members must be approved by an admin before gaining access
+- **JWT Authentication** — Token-based authentication with role separation (Admin / Member)
+- **Profile Photos** — Members can upload profile pictures via Cloudinary
+- **Responsive UI** — Works on both desktop and mobile
+- **Frontend Tests** — Component tests with Vitest and React Testing Library
+- **Backend Tests** — Unit and integration tests with JUnit 5 and Mockito
+
+### Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
 | **Frontend** | React 18, Vite, Tailwind CSS, Axios, React Router |
 | **Backend** | Java 21, Spring Boot 3, Spring Security, JWT |
-| **Veritabanı** | PostgreSQL (Neon.tech — ücretsiz) |
-| **Medya** | Cloudinary (ücretsiz) |
+| **Database** | PostgreSQL (hosted on [Neon.tech](https://neon.tech)) |
+| **Media Storage** | Cloudinary |
 | **Frontend Deploy** | Vercel |
 | **Backend Deploy** | Render.com |
-| **Frontend Testler** | Vitest + React Testing Library |
-| **Backend Testler** | JUnit 5 + Mockito |
+| **Frontend Tests** | Vitest + React Testing Library |
+| **Backend Tests** | JUnit 5 + Mockito |
 
----
-
-## 📂 Proje Yapısı
+### Project Structure
 
 ```
 ClanMatrix/
-├── clan-backend/       ← Spring Boot API
-└── clan-frontend/      ← React + Vite
+├── clan-backend/       # Spring Boot REST API
+└── clan-frontend/      # React + Vite SPA
 ```
 
----
+### Getting Started
 
-## ⚡ Hızlı Başlangıç (Local)
+**Prerequisites:** Java 21+, Maven 3.9+, Node.js 20+, npm 10+, PostgreSQL ([neon.tech](https://neon.tech) free tier works), Cloudinary account (free tier)
 
-### Gereksinimler
-- Java 21+
-- Maven 3.9+
-- Node.js 20+
-- npm 10+
+**1. Clone the repository**
+```bash
+git clone https://github.com/T-anay/ClanMatrix.git
+cd ClanMatrix
+```
 
-### 1️⃣ Çevre Değişkenleri Hazırla
+**2. Configure the backend**
 
-**Backend** — `clan-backend/src/main/resources/application-dev.properties` dosyası oluştur (git'e gitmiyor):
+Create `clan-backend/src/main/resources/application-dev.properties` (git-ignored):
 ```properties
 spring.datasource.url=jdbc:postgresql://<NEON_HOST>/<DB_NAME>?sslmode=require
 spring.datasource.username=<DB_USER>
 spring.datasource.password=<DB_PASSWORD>
-jwt.secret=clanmatrix-super-secret-key-min-256-bits-long-change-this
+jwt.secret=your-secret-key-min-256-bits-long
 jwt.expiration=86400000
 cloudinary.cloud-name=<CLOUDINARY_CLOUD>
 cloudinary.api-key=<CLOUDINARY_API_KEY>
 cloudinary.api-secret=<CLOUDINARY_API_SECRET>
-admin.username=admin
-admin.password=Admin1234!
 ```
 
-**Frontend** — `clan-frontend/.env` dosyası oluştur:
-```
-VITE_API_BASE_URL=http://localhost:8080/api
-```
-
-### 2️⃣ Backend Başlat
-
+**3. Start the backend**
 ```bash
 cd clan-backend
 mvn spring-boot:run -Dspring-boot.run.profiles=dev
 ```
 
-> İlk başlatmada DataInitializer otomatik olarak admin hesabı oluşturur:
-> - Kullanıcı Adı: admin
-> - Şifre: Admin1234!
+On first launch, a default admin account is created automatically:
+- **Username:** `admin` | **Password:** `Admin1234!`
 
-### 3️⃣ Frontend Başlat
+**4. Configure the frontend**
 
+Create `clan-frontend/.env`:
+```env
+VITE_API_BASE_URL=http://localhost:8080/api
+```
+
+**5. Start the frontend**
 ```bash
 cd clan-frontend
 npm install
 npm run dev
 ```
 
-Uygulama http://localhost:5173 adresinde çalışır.
+The app will be available at `http://localhost:5173`.
 
----
-
-## 🗄️ Veritabanı (Neon.tech Kurulumu)
-
-1. https://neon.tech üzerinde ücretsiz hesap aç
-2. Yeni proje oluştur → Connection string kopyala
-3. application-dev.properties'e yapıştır
-
-Spring Boot uygulama açılışında tabloları (users, events, event_submissions) otomatik oluşturur (ddl-auto=update).
-
----
-
-## 🖼️ Cloudinary Kurulumu
-
-1. https://cloudinary.com üzerinde ücretsiz hesap aç
-2. Dashboard → API Keys → Cloud Name, API Key, API Secret kopyala
-3. application-dev.properties'e yapıştır
-
----
-
-## 🚀 Production Deployment
-
-### Backend → Render.com
-
-1. render.com → New Web Service → GitHub repo'yu bağla
-2. Build Command: mvn clean package -DskipTests
-3. Start Command: java -jar target/clan-backend-0.0.1-SNAPSHOT.jar
-4. Environment Variables sekmesine ekle:
-
-| Değişken | Açıklama |
-|----------|---------|
-| DB_URL | jdbc:postgresql://... (Neon.tech) |
-| DB_USER | Neon kullanıcı adı |
-| DB_PASSWORD | Neon şifresi |
-| JWT_SECRET_KEY | Güçlü rastgele string (min 32 karakter) |
-| JWT_EXPIRATION_MS | 86400000 |
-| CLOUDINARY_CLOUD_NAME | Cloudinary cloud adı |
-| CLOUDINARY_API_KEY | Cloudinary API key |
-| CLOUDINARY_API_SECRET | Cloudinary API secret |
-| ADMIN_USERNAME | Admin kullanıcı adı |
-| ADMIN_PASSWORD | Güçlü admin şifresi |
-| FRONTEND_URL | https://your-app.vercel.app |
-
-### Frontend → Vercel
-
-1. vercel.com → New Project → GitHub repo'yu bağla
-2. Root Directory: clan-frontend
-3. Environment Variables sekmesine ekle:
-
-| Değişken | Değer |
-|----------|-------|
-| VITE_API_BASE_URL | https://your-backend.onrender.com/api |
-
----
-
-## 🔒 Güvenlik Özeti
-
-| Tehdit | Koruma |
-|--------|--------|
-| SQL Injection | Spring Data JPA Prepared Statements |
-| XSS | React otomatik escape |
-| Şifre sızıntısı | BCrypt hashing |
-| CORS | Sadece Vercel domain'i kabul eder |
-| Yetkisiz erişim | JWT + @PreAuthorize |
-| Credential sızıntısı | .env ve application-dev.properties git'e gitmez |
-
----
-
-## 🧪 Testler
+### Running Tests
 
 ```bash
-# Backend testleri
-cd clan-backend
-mvn test
+# Frontend
+cd clan-frontend && npm run test
 
-# Frontend testleri
-cd clan-frontend
-npm run test
+# Backend
+cd clan-backend && mvn test
 ```
+
+### Environment Variables
+
+**Backend (`application-dev.properties`)**
+
+| Variable | Description |
+|----------|-------------|
+| `spring.datasource.url` | PostgreSQL JDBC connection string |
+| `spring.datasource.username` | Database username |
+| `spring.datasource.password` | Database password |
+| `jwt.secret` | JWT signing key (min. 256 bits) |
+| `jwt.expiration` | Token expiry in milliseconds (86400000 = 24h) |
+| `cloudinary.cloud-name` | Cloudinary cloud name |
+| `cloudinary.api-key` | Cloudinary API key |
+| `cloudinary.api-secret` | Cloudinary API secret |
+
+**Frontend (`.env`)**
+
+| Variable | Description |
+|----------|-------------|
+| `VITE_API_BASE_URL` | Backend API base URL |
 
 ---
 
-## 📖 API Dokümantasyonu
+## 🇹🇷 Türkçe
 
-### Public
-| Method | URL | Açıklama |
-|--------|-----|---------|
-| POST | /api/auth/register | Kayıt ol |
-| POST | /api/auth/login | Giriş yap |
+ClanMatrix, klan üyelerinin etkinliklere katılımını Excel benzeri bir matris tabloda takip eden full-stack bir web uygulamasıdır. Üyeler kayıt olup katılım talebinde bulunabilir, yöneticiler ise üyelikleri onaylayarak etkinlikleri yönetir. Kişisel bir hobi projesi olarak geliştirilmiştir.
 
-### User + Admin
-| Method | URL | Açıklama |
-|--------|-----|---------|
-| GET | /api/events | Etkinlik listesi |
-| GET | /api/submissions | Matris verisi |
-| POST | /api/submissions/upload | Resim yükle (multipart) |
+### Özellikler
 
-### Admin Only
-| Method | URL | Açıklama |
-|--------|-----|---------|
-| GET | /api/users/pending | Onay bekleyenler |
-| PUT | /api/users/{id}/approve | Kullanıcı onayla |
-| DELETE | /api/users/{id} | Kullanıcı sil |
-| POST | /api/events | Etkinlik ekle |
-| DELETE | /api/events/{id} | Etkinlik sil |
+- **Etkinlik Matrisi** — Üye-etkinlik katılımını tablo görünümünde göster
+- **Admin Onay Sistemi** — Yeni üyeler erişim kazanmadan önce admin onayından geçmeli
+- **JWT Kimlik Doğrulama** — Rol ayrımıyla (Admin / Üye) token tabanlı kimlik doğrulama
+- **Profil Fotoğrafı** — Üyeler Cloudinary aracılığıyla profil fotoğrafı yükleyebilir
+- **Duyarlı Tasarım** — Hem masaüstü hem mobilde çalışır
+- **Frontend Testleri** — Vitest ve React Testing Library ile bileşen testleri
+- **Backend Testleri** — JUnit 5 ve Mockito ile birim ve entegrasyon testleri
+
+### Teknoloji Yığını
+
+| Katman | Teknoloji |
+|--------|-----------|
+| **Frontend** | React 18, Vite, Tailwind CSS, Axios, React Router |
+| **Backend** | Java 21, Spring Boot 3, Spring Security, JWT |
+| **Veritabanı** | PostgreSQL ([Neon.tech](https://neon.tech) ücretsiz) |
+| **Medya Depolama** | Cloudinary |
+| **Frontend Deploy** | Vercel |
+| **Backend Deploy** | Render.com |
+| **Frontend Testler** | Vitest + React Testing Library |
+| **Backend Testler** | JUnit 5 + Mockito |
+
+### Başlarken
+
+**Gereksinimler:** Java 21+, Maven 3.9+, Node.js 20+, npm 10+, PostgreSQL ([neon.tech](https://neon.tech) ücretsiz), Cloudinary hesabı (ücretsiz)
+
+**1. Repoyu klonlayın**
+```bash
+git clone https://github.com/T-anay/ClanMatrix.git
+cd ClanMatrix
+```
+
+**2. Backend'i yapılandırın**
+
+`clan-backend/src/main/resources/application-dev.properties` dosyasını oluşturun (git'e gitmez):
+```properties
+spring.datasource.url=jdbc:postgresql://<NEON_HOST>/<DB_NAME>?sslmode=require
+spring.datasource.username=<DB_USER>
+spring.datasource.password=<DB_PASSWORD>
+jwt.secret=en-az-256-bit-uzunlugunda-gizli-anahtar
+jwt.expiration=86400000
+cloudinary.cloud-name=<CLOUDINARY_CLOUD>
+cloudinary.api-key=<CLOUDINARY_API_KEY>
+cloudinary.api-secret=<CLOUDINARY_API_SECRET>
+```
+
+**3. Backend'i başlatın**
+```bash
+cd clan-backend
+mvn spring-boot:run -Dspring-boot.run.profiles=dev
+```
+
+İlk başlatmada varsayılan admin hesabı otomatik oluşturulur:
+- **Kullanıcı Adı:** `admin` | **Şifre:** `Admin1234!`
+
+**4. Frontend'i yapılandırın**
+
+`clan-frontend/.env` dosyasını oluşturun:
+```env
+VITE_API_BASE_URL=http://localhost:8080/api
+```
+
+**5. Frontend'i başlatın**
+```bash
+cd clan-frontend
+npm install
+npm run dev
+```
+
+Uygulama `http://localhost:5173` adresinde çalışır.
+
+### Testleri Çalıştırma
+
+```bash
+# Frontend
+cd clan-frontend && npm run test
+
+# Backend
+cd clan-backend && mvn test
+```
