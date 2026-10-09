@@ -21,7 +21,7 @@ ClanMatrix is a full-stack web application for tracking clan members' participat
 - **Activity Matrix** — Visualize member-event participation in a spreadsheet-style grid
 - **Admin Approval System** — New members must be approved by an admin before gaining access
 - **JWT Authentication** — Token-based authentication with role separation (Admin / Member)
-- **Profile Photos** — Members can upload profile pictures via Cloudinary
+- **Profile Photos** — Members can upload profile pictures via Cloudflare R2
 - **Responsive UI** — Works on both desktop and mobile
 - **Frontend Tests** — Component tests with Vitest and React Testing Library
 - **Backend Tests** — Unit and integration tests with JUnit 5 and Mockito
@@ -33,7 +33,7 @@ ClanMatrix is a full-stack web application for tracking clan members' participat
 | **Frontend** | React 18, Vite, Tailwind CSS, Axios, React Router |
 | **Backend** | Java 21, Spring Boot 3, Spring Security, JWT |
 | **Database** | PostgreSQL (hosted on [Neon.tech](https://neon.tech)) |
-| **Media Storage** | Cloudinary |
+| **Media Storage** | Cloudflare R2 |
 | **Frontend Deploy** | Vercel |
 | **Backend Deploy** | Render.com |
 | **Frontend Tests** | Vitest + React Testing Library |
@@ -49,7 +49,7 @@ ClanMatrix/
 
 ### Getting Started
 
-**Prerequisites:** Java 21+, Maven 3.9+, Node.js 20+, npm 10+, PostgreSQL ([neon.tech](https://neon.tech) free tier works), Cloudinary account (free tier)
+**Prerequisites:** Java 21+, Maven 3.9+, Node.js 20+, npm 10+, PostgreSQL ([neon.tech](https://neon.tech) free tier works), Cloudflare R2 Account
 
 **1. Clone the repository**
 ```bash
@@ -66,9 +66,9 @@ spring.datasource.username=<DB_USER>
 spring.datasource.password=<DB_PASSWORD>
 jwt.secret=your-secret-key-min-256-bits-long
 jwt.expiration=86400000
-cloudinary.cloud-name=<CLOUDINARY_CLOUD>
-cloudinary.api-key=<CLOUDINARY_API_KEY>
-cloudinary.api-secret=<CLOUDINARY_API_SECRET>
+r2.access-key=<R2_ACCESS_KEY>
+r2.secret-key=<R2_SECRET_KEY>
+r2.bucket-url=<R2_BUCKET_URL>
 ```
 
 **3. Start the backend**
@@ -138,7 +138,7 @@ ClanMatrix, klan üyelerinin etkinliklere katılımını Excel benzeri bir matri
 - **Etkinlik Matrisi** — Üye-etkinlik katılımını tablo görünümünde göster
 - **Admin Onay Sistemi** — Yeni üyeler erişim kazanmadan önce admin onayından geçmeli
 - **JWT Kimlik Doğrulama** — Rol ayrımıyla (Admin / Üye) token tabanlı kimlik doğrulama
-- **Profil Fotoğrafı** — Üyeler Cloudinary aracılığıyla profil fotoğrafı yükleyebilir
+- **Profil Fotoğrafı** — Üyeler Cloudflare R2 aracılığıyla profil fotoğrafı yükleyebilir
 - **Duyarlı Tasarım** — Hem masaüstü hem mobilde çalışır
 - **Frontend Testleri** — Vitest ve React Testing Library ile bileşen testleri
 - **Backend Testleri** — JUnit 5 ve Mockito ile birim ve entegrasyon testleri
@@ -150,7 +150,7 @@ ClanMatrix, klan üyelerinin etkinliklere katılımını Excel benzeri bir matri
 | **Frontend** | React 18, Vite, Tailwind CSS, Axios, React Router |
 | **Backend** | Java 21, Spring Boot 3, Spring Security, JWT |
 | **Veritabanı** | PostgreSQL ([Neon.tech](https://neon.tech) ücretsiz) |
-| **Medya Depolama** | Cloudinary |
+| **Medya Depolama** | Cloudflare R2 |
 | **Frontend Deploy** | Vercel |
 | **Backend Deploy** | Render.com |
 | **Frontend Testler** | Vitest + React Testing Library |
@@ -158,7 +158,7 @@ ClanMatrix, klan üyelerinin etkinliklere katılımını Excel benzeri bir matri
 
 ### Başlarken
 
-**Gereksinimler:** Java 21+, Maven 3.9+, Node.js 20+, npm 10+, PostgreSQL ([neon.tech](https://neon.tech) ücretsiz), Cloudinary hesabı (ücretsiz)
+**Gereksinimler:** Java 21+, Maven 3.9+, Node.js 20+, npm 10+, PostgreSQL ([neon.tech](https://neon.tech) ücretsiz), Cloudflare R2 Hesabı
 
 **1. Repoyu klonlayın**
 ```bash
@@ -175,9 +175,9 @@ spring.datasource.username=<DB_USER>
 spring.datasource.password=<DB_PASSWORD>
 jwt.secret=en-az-256-bit-uzunlugunda-gizli-anahtar
 jwt.expiration=86400000
-cloudinary.cloud-name=<CLOUDINARY_CLOUD>
-cloudinary.api-key=<CLOUDINARY_API_KEY>
-cloudinary.api-secret=<CLOUDINARY_API_SECRET>
+r2.access-key=<R2_ACCESS_KEY>
+r2.secret-key=<R2_SECRET_KEY>
+r2.bucket-url=<R2_BUCKET_URL>
 ```
 
 **3. Backend'i başlatın**
